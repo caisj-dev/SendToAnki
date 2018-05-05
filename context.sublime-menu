@@ -1,0 +1,17 @@
+[
+{ 
+    "caption": "SendToAnki", 
+	"id": "Send_to_Anki", 
+	"children":
+	[
+	{
+	"caption": "SendToAnki Selection",
+	"command": "send_to_anki"
+	}
+	// {
+	// "caption": "SendToAnki Selection",
+	// "command": "unwebify"
+	// }
+	]
+}
+]
