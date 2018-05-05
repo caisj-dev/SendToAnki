@@ -24,7 +24,7 @@ class InsertNoteFieldBySyntaxCommand(sublime_plugin.TextCommand):
 
 		# this will populate the quick_panel with models of markdown formats
 		self.list = self.getParsedModel()
-
+		#
 
 		#show  the above list in the panel, 
 		#self.on_done is called when one  of the item was chosen by user
