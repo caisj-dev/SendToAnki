@@ -15,21 +15,14 @@ import markdown2
 
 class InsertNoteFieldBySyntaxCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
-		# for Test
-		print('"run" method of "InsertNoteFieldBySyntaxCommand"')
-
-		# Note.cardModel2MarkdowndSyntax('知识点-Mix (Leaflyer)')
-		# print(text)
-		# get model name list
-
 		# this will populate the quick_panel with models of markdown formats
-		self.list = self.getParsedModel()
-		#
 
+
+		self.list = self.getParsedModel()
 		#show  the above list in the panel, 
 		#self.on_done is called when one  of the item was chosen by user
 		self.view.window().show_quick_panel(self.list, self.on_done,1, 0)
-
+		MyHelper.parseMDCardInfo('model:dab')
 	def on_done(self, index):
 		#  if user cancels with Esc key, do nothing
 		#  if canceled, index is returned as  -1
@@ -45,7 +38,7 @@ class InsertNoteFieldBySyntaxCommand(sublime_plugin.TextCommand):
 	def getParsedModel(self):
 		parsedModel =[]
 		#get all model names in list
-		modelList = MyHelper.ParseCardModelName2List()
+		modelList = MyHelper.parseCardModelName2List()
 		#parse each of the model in the list 
 		for model in modelList:
 			parsedModel.append(Note.cardModel2MarkdowndSyntax(model))
@@ -61,7 +54,6 @@ class SendToAnkiCommand(sublime_plugin.TextCommand): #create Webify Text Command
 		x = AnkiResource()
 		# print (ForTest.ModelNameList ())
 		ForTest.ModelNameList ()
-			
 
 		print(x.getDeckNames())
 		deckName = 'Programing&Algorithm'

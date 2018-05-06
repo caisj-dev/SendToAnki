@@ -80,12 +80,12 @@ class Note:
 
 		##Other  Knowledge
 	def cardModel2MarkdowndSyntax( modelName):
-		mfList =MyHelper.ParseCardModelFields2List(modelName)
+		mfList =MyHelper.parseCardModelFields2List(modelName)
 		mfStartList = []
-		mfStartList.append('*****')
-		mfStartList.append('Model:'+ modelName + '\n' )
+		mfStartList.append('-----------------------')
+		mfStartList.append('Model:'+ modelName  )
 		
-		mfStartList.append('*****\n')
+		mfStartList.append('-----------------------\n')
 		str  = '\n'
 		mfStartString = str.join(mfStartList)
 
@@ -94,6 +94,7 @@ class Note:
 		mfListTemp.append('##Tag')
 		for field in mfList:
 			mfListTemp.append('##'+field)
+		mfListTemp.append('------------------------\n')
 		# seperate by two line, easy to read in MarkDown
 		str  = '\n\n'
 		mfString = str.join(mfListTemp)
@@ -121,8 +122,8 @@ class MyHelper:
 			return True
 		else:
 			return False
-#parse the model name from Anki resource.
-	def ParseCardModelName2List():
+         #parse the model name from Anki resource to string
+	def parseCardModelName2List():
 		modelNameDict = AnkiResource().getModelNames()
 		# for key,values in  ModelNamedict.items():
 		if 'result' in modelNameDict:
@@ -133,7 +134,7 @@ class MyHelper:
 
 	# example:  
 	#modelName ='知识点-Mix (Leaflyer)'
-	def ParseCardModelFields2List(modelName):
+	def parseCardModelFields2List(modelName):
 		params ={ "modelName": modelName}
 		modelFieldNameDict = AnkiResource().getModelFieldNames(params)
 		# print(modelFieldNameDict)
@@ -142,6 +143,27 @@ class MyHelper:
 			# print(modelNameDict.get('result'))
 			modelFieldNameList=  modelFieldNameDict.get('result')
 		return modelFieldNameList
+	#check if the current line is Field Name
+	def isMDFieldLine(MDLine):
+		patStartSign = re.compile(r'^[#]{2}')
+		if patStartSign.match( MDLine):
+			return True
+		else:
+			return False
+	#parse  field name of MD  syntax into field name string
+	def parseMDFieldName(MDLine):
+		
+		patStartSign = re.compile(r'^[#]{2}(.*)')
+		fieldname = patStartSign.match(MDLine).group(1)
+		print(type(fieldname))
+		return fieldname
+
+	#parse the Mmodelname of the note, return model name in string
+	def parseMDCardInfo(MDLine):
+		patStartSign = re.compile(r'^model:(.*)')
+		modelName = patStartSign.match(MDLine).group(1)
+		# print(modelName)
+		return modelName
 
 
 class ForTest:
