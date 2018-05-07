@@ -19,7 +19,7 @@ class AnkiResource:
 												}
 						)
 		print(r.json())
-		
+		#return a dictionay
 		print(type(r.json()))
 		return r.json()
 	#添加Card=Note
@@ -32,7 +32,7 @@ class AnkiResource:
 		return self.makeRequest('modelNames');
 
 	# 某个模板的所有field
-	def getModelFieldNames(self, params): 
+	def getModelFieldNames(self, params):
 # 		params ={ "modelName":'知识点-Mix (Leaflyer)'}
 #		x.getModelFieldNames(params)
 		return self.makeRequest('modelFieldNames', params);
@@ -44,11 +44,11 @@ class AnkiResource:
 	def getDeckNames(self):
 	# return self.makeRequest('version');
 		return self.makeRequest('deckNames');
-	
+
 class Note:
 	def __init__(self):
 		pass
-		
+
 	def add(  deckName, modelName, question, answer, tags) :
 		# self.deckName = deckName
 		# self.modelName = modelName
@@ -67,8 +67,8 @@ class Note:
 				}
 		r = AnkiResource()
 		r.addNote(note)
-	
-	
+
+
 	#Convert card model in dict format into MdSyntax
 	# its format is customazed.
 	# below is the example of Markdown syntax coresponding fields in one of my Anki models:
@@ -79,12 +79,12 @@ class Note:
 		##Note
 
 		##Other  Knowledge
-	def cardModel2MarkdowndSyntax( modelName):
+	def cardModel2MarkdowndSyntax( modelName,deckName):
 		mfList =MyHelper.parseCardModelFields2List(modelName)
 		mfStartList = []
 		mfStartList.append('-----------------------')
+		mfStartList.append('deck:'+ deckName  )
 		mfStartList.append('Model:'+ modelName  )
-		
 		mfStartList.append('-----------------------\n')
 		str  = '\n'
 		mfStartString = str.join(mfStartList)
@@ -122,23 +122,28 @@ class MyHelper:
 			return True
 		else:
 			return False
-         #parse the model name from Anki resource to string
-	def parseCardModelName2List():
+         #parse the model name from Anki resource to string format
+	def parseModelName2List():
 		modelNameDict = AnkiResource().getModelNames()
 		# for key,values in  ModelNamedict.items():
 		if 'result' in modelNameDict:
-			# print(modelNameDict.get('result'))
+			#get the list
 			modelNameList=  modelNameDict.get('result')
-			# print(type(modelNameList))
 		return modelNameList
 
-	# example:  
+	#parse the deck name from Anki resource to string format
+	def parseDeckName2List():
+		deckNameDict = AnkiResource().getDeckNames()
+		# for key,values in  ModelNamedict.items():
+		if 'result' in deckNameDict:
+			deckNameList=  deckNameDict.get('result')
+		return deckNameList
+	# example:
 	#modelName ='知识点-Mix (Leaflyer)'
 	def parseCardModelFields2List(modelName):
 		params ={ "modelName": modelName}
 		modelFieldNameDict = AnkiResource().getModelFieldNames(params)
 		# print(modelFieldNameDict)
-		# print(type(modelFieldNameDict))
 		if 'result' in modelFieldNameDict:
 			# print(modelNameDict.get('result'))
 			modelFieldNameList=  modelFieldNameDict.get('result')
@@ -152,7 +157,7 @@ class MyHelper:
 			return False
 	#parse  field name of MD  syntax into field name string
 	def parseMDFieldName(MDLine):
-		
+
 		patStartSign = re.compile(r'^[#]{2}(.*)')
 		fieldname = patStartSign.match(MDLine).group(1)
 		print(type(fieldname))
@@ -176,7 +181,7 @@ class ForTest:
 
 # a = markdown2.markdown("*boo!*", extras=["footnotes"])
 # print (a)
-	
+
 	# def GenStringList(N):
 	# 	Q = '#23'
 	# 	A = '##dss'
@@ -185,7 +190,7 @@ class ForTest:
 	# 		L.add(i, Q)
 	# 		L.add(i, A)
 	# 	return L
-		
+
 # print(Helper.GenStringList(6))
 
 # a = '##12'#Q F,A T
