@@ -40,12 +40,12 @@ Your notes are recommended to be taken in Markdown file, for the anki models are
 In a Markdown file, open the Command Palette *(<kbd>ctrl</kbd> <kbd>;</kbd> )* and choose one of the Anki`deck` that you are going to place the note in. Then chose one of the model.
 
 ### Send to Anki
-In a Markdown file, simply select all the note that your would to memorize. Right click and chose the
+In a Markdown file, simply select all the notes that you would like to memorize. Right click at the select area and chose 'SendtoAnki' in the menu. Then each of the notes will be sent to specific deck in Anki, separately
 
 
 ### Keyboard shortcut
 
-You can also set up a keyboard shortcut to run the command by opening up "Preferences → Key Bindings - User" and adding your shortcut with the `autoprefixer` command.
+You can also set up a keyboard shortcut to run the command by opening up "Preferences → Key Bindings - User" and adding your shortcut with the `insert_note_field_by_syntax` command.
 
 Example:
 
