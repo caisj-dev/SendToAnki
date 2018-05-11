@@ -11,25 +11,39 @@ class AnkiResource:
 
 	def makeRequest(self, action, params={}):
 		# request = json.dumps([ action, params ])
-		r = requests.post("http://127.0.0.1:8765", json=
+
+		try:
+			r = requests.post("http://127.0.0.1:8765", json=
 												{
 												    "action": action,
 												    "version": 5,
 												    "params": params
 												}
 						)
-		print(r.json())
-		#return a dictionay
-		print(type(r.json()))
-		return r.json()
+		except ConnectionError as e:
+			print('AnkiConnectNotRunning')
+			# TODO inform the user
+
+		else:
+			print('AnkiConnect')
+			print(r.json())
+			#return a dictionay
+			print(type(r.json()))
+			return r.json()
 	#添加Card=Note
 	def addNote(self, params):
-		if params:
-			return self.makeRequest('addNote', params);
-
+		## handle the error TypeError
+		try:
+			if params:
+				return self.makeRequest('addNote', params);
+		except:
+			pass
 	# 所有模板名
 	def getModelNames(self):
-		return self.makeRequest('modelNames');
+		try:
+			return self.makeRequest('modelNames');
+		except :
+			pass
 
 	# 某个模板的所有field
 	def getModelFieldNames(self, params):
@@ -43,7 +57,10 @@ class AnkiResource:
 
 	def getDeckNames(self):
 	# return self.makeRequest('version');
-		return self.makeRequest('deckNames');
+		try:
+			return self.makeRequest('deckNames');
+		except :
+			print('DECKNAME ERROR')
 
 class Note:
 	def __init__(self):
@@ -124,7 +141,9 @@ class MyHelper:
 			return False
          #parse the model name from Anki resource to string format
 	def parseModelName2List():
+
 		modelNameDict = AnkiResource().getModelNames()
+
 		# for key,values in  ModelNamedict.items():
 		if 'result' in modelNameDict:
 			#get the list
@@ -133,11 +152,18 @@ class MyHelper:
 
 	#parse the deck name from Anki resource to string format
 	def parseDeckName2List():
-		deckNameDict = AnkiResource().getDeckNames()
+		try:
+			deckNameDict = AnkiResource().getDeckNames()
+
+		except:
 		# for key,values in  ModelNamedict.items():
-		if 'result' in deckNameDict:
-			deckNameList=  deckNameDict.get('result')
+			try:
+				if 'result' in deckNameDict:
+					deckNameList=  deckNameDict.get('result')
+			except TypeError as e:
+				pass
 		return deckNameList
+
 	# example:
 	#modelName ='知识点-Mix (Leaflyer)'
 	def parseCardModelFields2List(modelName):
@@ -177,6 +203,38 @@ class ForTest:
 		#print list string
 		print('[%s]' % ', '.join(map(str, aList)))
 		return aList
+# maintain a dict of all response from a single request
+class AnkiResourceTest:
+	def __init__(self):
+		self.res_dict = {}
+
+	def get_version(self, params):
+	# return self.makeRequest('version');
+		self.res_dict = self.makeRequest(params);
+		return self.res_dict
+
+	def makeRequest(self, action, params={}):
+		# request = json.dumps([ action, params ])
+
+		try:
+			r = requests.post("http://127.0.0.1:8765", json=
+												{
+												    "action": action,
+												    "version": 5,
+												    "params": params
+												}
+						)
+		except ConnectionError as e:
+			print('AnkiConnectNotRunning')
+			return {}
+			# TODO inform the user
+
+		else:
+			print('AnkiConnect')
+			print(r.json())
+			#return a dictionay
+			print(type(r.json()))
+			return r.json()
 
 
 # a = markdown2.markdown("*boo!*", extras=["footnotes"])
