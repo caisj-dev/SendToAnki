@@ -8,20 +8,26 @@ import  markdown2
 class AnkiResource:
 	def __init__(self):
 		pass
-
+	# sublime.error_message("Could not find a definition")
 	def makeRequest(self, action, params={}):
 		# request = json.dumps([ action, params ])
-		r = requests.post("http://127.0.0.1:8765", json=
+		try:
+			r = requests.post("http://127.0.0.1:8765", json=
 												{
 												    "action": action,
 												    "version": 5,
 												    "params": params
 												}
 						)
-		print(r.json())
-		#return a dictionay
-		print(type(r.json()))
-		return r.json()
+		except ConnectionRefusedError:
+			return None
+
+		else:
+			print(r.json())
+			#return a dictionay
+			print(type(r.json()))
+
+			return r.json()
 	#添加Card=Note
 	def addNote(self, params):
 		if params:
@@ -45,6 +51,14 @@ class AnkiResource:
 	# return self.makeRequest('version');
 		return self.makeRequest('deckNames');
 
+class Model:
+	def __init__(self, name, fileds, content)
+		#model name
+		self.name = name
+		#model fields in a list
+		self.fields = fields
+		#model content in a dictionary
+		self.content = content
 class Note:
 	def __init__(self):
 		pass

@@ -28,6 +28,12 @@ class InsertNoteFieldBySyntaxCommand(sublime_plugin.TextCommand):
 		# for deck in decksLst:
 		# 	print(deck)
 
+
+	# 	items = ['Text', 'Another']
+	# 	self.view.show_popup_menu(items, self.on_done)
+	# def on_done(self, result):
+	# 	print(result)
+
 	def on_done(self, index):
 		#  if user cancels with Esc key, do nothing
 		#  if canceled, index is returned as  -1
