@@ -84,20 +84,46 @@ class Model:
 	#return fields of a model
 	def getFields(self):
 		params = {"modelName": self.name}
-		r = Resource('modelFieldNames',params)
-
+		r = Resource('modelFieldNames', params)
 		if r.response != {}:
 			return r.response.get('result')
 		else:
 			return []
-		# pass
 	def printfields(self):
 		for field in self.fields:
 			print(field)
+
+class Notes:
+	def __init__(self, model, deck, content, tags):
+		self.model = model
+		self.fields_dict = getFieldContent(model, content)
+		self.deck = deck
+		self.tags = tags
+
+	def getFieldContent(self.model, content):
+		#new a dict that store each field's content
+		field = dict()
+		for field in self.model.fields:
+
+			d[field] = newContent_fromcontent
+		return field
+	def sendNote(self)：
+		note = {'note':{'deckName':self.deck,
+						'modelName':self.model,
+						'fields':self.fields_dict,
+						'tags':self.tags
+						}
+				}
+
+		r = Resource('addNote', note)
+		if r.response != {}:
+			return r.response.get('result')
+
 class Note:
 	def __init__(self):
 		pass
 
+	##Temp method
 	def add(  deckName, modelName, question, answer, tags) :
 		# self.deckName = deckName
 		# self.modelName = modelName
