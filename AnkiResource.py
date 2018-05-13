@@ -5,6 +5,11 @@ import re
 import requests
 import  markdown2
 # import items
+API_VERSION = 5
+API_URL     = 'http://localhost:8765'
+
+
+
 class AnkiResource:
 	def __init__(self):
 		pass
@@ -51,14 +56,44 @@ class AnkiResource:
 	# return self.makeRequest('version');
 		return self.makeRequest('deckNames');
 
+class Resource:
+	def __init__(self, action, params={}):
+		try:
+			self.response = requests.post(API_URL, json = self.request(action, params))
+			self.response = self.response.json()
+		except requests.exceptions.ConnectionError:
+			print('无法连接AnkiConnect端口，请安装该插件后重启Anki')
+			self.response = {}
+		else:
+			# print(self.response)
+			if len(self.response) == 2:
+				print('请求成功，正在处理结果...')
+
+	def request(self, action, params):
+		return {'action': action, 'params': params, 'version': API_VERSION}
+
 class Model:
-	def __init__(self, name, fileds, content)
+	def __init__(self, name):
 		#model name
 		self.name = name
 		#model fields in a list
-		self.fields = fields
+		self.fields = self.getFields()
 		#model content in a dictionary
-		self.content = content
+		# self.content = self.getFieldsCotent()
+
+	#return fields of a model
+	def getFields(self):
+		params = {"modelName": self.name}
+		r = Resource('modelFieldNames',params)
+
+		if r.response != {}:
+			return r.response.get('result')
+		else:
+			return []
+		# pass
+	def printfields(self):
+		for field in self.fields:
+			print(field)
 class Note:
 	def __init__(self):
 		pass

@@ -1,5 +1,5 @@
 #TechSideOnline.com Webify Sublime Text 3 plugin example
-from .AnkiResource import AnkiResource,Note,MyHelper,ForTest
+from .AnkiResource import AnkiResource,Note,MyHelper,ForTest,Resource,Model
 # from .Markdown2 import Markdown
 # import urllib
 import requests
@@ -74,32 +74,39 @@ class InsertMyText(sublime_plugin.TextCommand):
 
 class SendToAnkiCommand(sublime_plugin.TextCommand): #create Webify Text Command
 	def run(self, edit):   #implement run method
-		x = AnkiResource()
-		# print (ForTest.ModelNameList ())
-		ForTest.ModelNameList ()
 
-		print(x.getDeckNames())
-		deckName = 'Programing&Algorithm'
-		ModelName = '知识点-Basic (Leaflyer)'
-		tags = ['InnerClass']
-		for region in self.view.sel():  #get user selection
-			if not region.empty():  #if selection not empty then
-				s = self.view.substr(region)  #assign s variable the selected region
-				# print(s)
-				linesList = s.splitlines()
-				notes = self.getNotes(linesList)
-				for k, v in notes.items():
-					print(k, v)
-					v = markdown2.markdown(v, extras=["cuddled-lists"])  # or use `html = markdown_path(PATH)`
-					k = markdown2.markdown(k, extras=["cuddled-lists"])  # or use `html = markdown_path(PATH)`
-					# print( markdown2.markdown('Use the `printf()` function.') )
+		r = Model('知识点-Basic (Leaflyer)')
+		# print(AnkiResource().getModelNames())
+		# print(r.fields)
+		# r.printfields()
 
-					Note.add(deckName, ModelName, k, v,tags )
-				# self.view.replace(edit, region, news) #replace content in view
-				a = 'I did these things:\n* bullet1\n* bullet2\n* bullet3\n'
-				print(markdown2.markdown(a, extras=["cuddled-lists"]))
-			else:
-				print('空的region')
+	# def run(self, edit):   #implement run method
+	# 	x = AnkiResource()
+	# 	# print (ForTest.ModelNameList ())
+	# 	ForTest.ModelNameList ()
+
+	# 	print(x.getDeckNames())
+	# 	deckName = 'Programing&Algorithm'
+	# 	ModelName = '知识点-Basic (Leaflyer)'
+	# 	tags = ['InnerClass']
+	# 	for region in self.view.sel():  #get user selection
+	# 		if not region.empty():  #if selection not empty then
+	# 			s = self.view.substr(region)  #assign s variable the selected region
+	# 			# print(s)
+	# 			linesList = s.splitlines()
+	# 			notes = self.getNotes(linesList)
+	# 			for k, v in notes.items():
+	# 				print(k, v)
+	# 				v = markdown2.markdown(v, extras=["cuddled-lists"])  # or use `html = markdown_path(PATH)`
+	# 				k = markdown2.markdown(k, extras=["cuddled-lists"])  # or use `html = markdown_path(PATH)`
+	# 				# print( markdown2.markdown('Use the `printf()` function.') )
+
+	# 				Note.add(deckName, ModelName, k, v,tags )
+	# 			# self.view.replace(edit, region, news) #replace content in view
+	# 			a = 'I did these things:\n* bullet1\n* bullet2\n* bullet3\n'
+	# 			print(markdown2.markdown(a, extras=["cuddled-lists"]))
+	# 		else:
+	# 			print('空的region')
 
 
 	def getNotes(self, listOfLines):
