@@ -94,20 +94,20 @@ class Model:
 			print(field)
 
 class Notes:
-	def __init__(self, model, deck, content, tags):
+	def __init__(self, deck, model, content, tags):
 		self.model = model
-		self.fields_dict = getFieldContent(model, content)
+		self.fields_dict = initFields(model, content)
 		self.deck = deck
 		self.tags = tags
 
-	def getFieldContent(self.model, content):
+	def initFields(self, model, content):
 		#new a dict that store each field's content
 		field = dict()
 		for field in self.model.fields:
-
 			d[field] = newContent_fromcontent
 		return field
-	def sendNote(self)：
+
+	def sendNote(self):
 		note = {'note':{'deckName':self.deck,
 						'modelName':self.model,
 						'fields':self.fields_dict,
