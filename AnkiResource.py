@@ -65,10 +65,12 @@ class Resource:
 		else:
 			# print(self.response)
 			if len(self.response) == 2:
-				print('请求成功，正在处理结果...')
+				print('已连接Anki，正在处理结果...')
 
 	def request(self, action, params):
 		return {'action': action, 'params': params, 'version': API_VERSION}
+
+
 
 class Model:
 	def __init__(self, name):
@@ -76,30 +78,32 @@ class Model:
 		self.name   = name
 		#model fields in a list
 		self.fields = self.getFields()
-		#model content in a dictionary
-		# self.content = self.getFieldsCotent()
 
 	#return fields of a model
 	def getFields(self):
-		params = {"modelName": self.name}
-		r = Resource('modelFieldNames', params)
-		if r.response != {}:
-			return r.response.get('result')
-		else:
-			return []
-	def printfields(self):
-		for field in self.fields:
-			print(field)
+		# params = {"modelName": self.name}
+		# r = Resource('modelFieldNames', params)
+		# if r.response != {}:
+		# 	return r.response.get('result')
+		# else:
+		# 	return []
+
+		params ={ "modelName": self.name}
+		modelFieldNameDict = AnkiResource().getModelFieldNames(params)
+		# print(modelFieldNameDict)
+		if 'result' in modelFieldNameDict:
+			# print(modelNameDict.get('result'))
+			modelFieldNameList=  modelFieldNameDict.get('result')
+		return modelFieldNameList
+
 
 class Notes:
 	def __init__(self, body):
 		self.deck        = self.parseDeckName(body)
 		self.model       = Model(self.parseModelName(body))
 		self.fields_dict = self.parseTXT2Fields(body)
-		# self.fields_dict = fields_dict
-
-		self.tags        = self.parseTags(body)
-
+		self.tags_list   = self.parseTags(body)
+		self.is_sent 	 = False
 	# return body of note, dict
 	def parseTXT2Fields(self, body):
 		d = {}
@@ -108,14 +112,14 @@ class Notes:
 			# st = '##{0}\n([\s\S]+)##'.format(field)
 			pat = re.compile(r'{0}'.format('##{0}\n([\s\S]+?)##'.format(field)))
 
-			res = pat.search(body) 
+			res = pat.search(body)
 			if res != None:
 				res = res.group(1)
 				d[field] = res
 			else:
 				st = '##{0}\n([\s\S]+?)\n--'.format(field)
 				pat = re.compile(r'{0}'.format(st))
-				res = pat.search(body) 
+				res = pat.search(body)
 				if res != None:
 					res = res.group(1)
 					d[field] = res
@@ -140,57 +144,51 @@ class Notes:
 		else:
 			return ''
 		return res_deck
-
+	#TODO： return list of tags
 	def parseTags(self, body):
+		res_tag = []
 		pat = re.compile(r'{0}'.format('##Tags([\s\S]+?)##'))
-		res_tag = pat.search(body)
-		if res_tag != None:
-			res_tag = res_tag.group(1)
-		else:
-			return ''
+		res = pat.search(body)
+		if res != None:
+			res_tag.append(res.group(1))
 		return res_tag
 
 	def sendNote(self):
-		# print(self.deck)
-		# # print(self.model)
-		# print(self.tags)
-		# print(type(self.fields_dict))
-		
-
-
-		params = {'note':{'deckName':'Programing&Algorithm',
-						'modelName':'知识点-Basic (Leaflyer)',
-						'fields':{
-							'问题': 'question',
-							'答案': 'answer',
-							'笔记': '',
-							'相关知识': ''
-							},
-						'tags':'tags'
+		print('sendNote:'+self.deck)
+		params = {
+				'note':{
+						'deckName' :self.deck,
+						'modelName':self.model.name,
+						'fields'   :self.fields_dict,
+						'tags'     :self.tags_list
 						}
 				}
 		r = AnkiResource()
 		r.addNote(params)
-		
-		# r = Resource('addNote', params)
-		# if r.response != {}:
-		# 	return r.response.get('result')
+
+		#if has non-empty string in result
+		# if r.response.get('result'):
+		# 	self.is_sent = True
+		# 	print(r.response.get('result'))
+		# 	print (bool(r.response.get('error')))
 
 
 #creat new Template by the givin model and deck.
 class Template:
 	def __init__(self, deck, model):
-		self.deck  = deck
-		self.model = Model(model)
+		self.deck        = deck
+		self.model       = model
+		self.fields_list = Model(model).fields
+
 	#return a template string.
 	def new(self):
-		fields_list = self.model.fields
-		print(len(fields_list))
-		if len(fields_list) != 0:
+		# fields_list = self.model.fields
+		print(len(self.fields_list))
+		if len(self.fields_list) != 0:
 			info_list = []
 			info_list.append('-----------------------')
-			info_list.append('deck:'+ self.deck  )
-			info_list.append('Model:'+ self.model.name  )
+			info_list.append('Deck:'+ self.deck  )
+			info_list.append('Model:'+ self.model )
 			info_list.append('-----------------------\n')
 			str  = '\n'
 			info_string = str.join(info_list)
@@ -199,7 +197,7 @@ class Template:
 			# add Tag
 			body_list.append('##Tags')
 
-			for field in fields_list:
+			for field in self.fields_list:
 				body_list.append('##' + field)
 			body_list.append('------------------------\n')
 			# seperate by two line, easy to read in MarkDown

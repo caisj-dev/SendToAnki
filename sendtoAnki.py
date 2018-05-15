@@ -65,7 +65,7 @@ class InsertNoteFieldBySyntaxCommand(sublime_plugin.TextCommand):
 		deck = self.deck
 		#parse each of the model in the list
 		for model in modelList:
-			parsedModel.append([model,Note.cardModel2MarkdowndSyntax(model, deck)])
+			parsedModel.append([model,Template(deck, model).new()])
 		return parsedModel
 
 class InsertMyText(sublime_plugin.TextCommand):
@@ -74,80 +74,70 @@ class InsertMyText(sublime_plugin.TextCommand):
 
 
 class SendToAnkiCommand(sublime_plugin.TextCommand): #create Webify Text Command
-	def run(self, edit):   #implement run method
-
-		r = Model('知识点-Basic (Leaflyer)')
-		# print(AnkiResource().getModelNames())
-		print(r.name, r.fields)
-		# r.printfields()
-		# content_dict = {"问题":"one","答案":"two",'笔记':"ddd",'相关知识':"d"}
-		# note = Notes("Default", '知识点-Basic (Leaflyer)')
-		# dic = note.fields_dict
-		# print(json.dumps(dic, indent = 4))
-
-		t = Template('deck1', '知识点-Basic (Leaflyer)').new()
-		# print(t)
-		t_note ='''-----------------------
-Deck:AnKindle
-Model:知识点-Basic (Leaflyer)
------------------------
-##Tags
-tagtest
-##问题
-question...
-##答案
-answer...
-##笔记
-note
-##相关知识
-
-------------------------'''
-		# print(t_note)
-		n = Notes(t_note)
-		print(n.deck)
-		print(n.tags)
-
-		Note.add('Programing&Algorith', '识点-Basic (Leaflyer)', 'QQ', 'AA','tags' )
-		# print()
-		# print('——————')
-		# for key,value in n.fields_dict.items():
-		# 	print(key)
-		# 	print('*')
-		# 	print(value)
-		# 	print('****')
-		# print(n.deck)
-		# print(n.tags)
-		# print(n.model)
-		# n.sendNote()
-		# print(n.sendNote())
-
 	# def run(self, edit):   #implement run method
-	# 	x = AnkiResource()
-	# 	# print (ForTest.ModelNameList ())
-	# 	ForTest.ModelNameList ()
 
-	# 	print(x.getDeckNames())
-	# 	deckName = 'Programing&Algorithm'
-	# 	ModelName = '知识点-Basic (Leaflyer)'
-	# 	tags = ['InnerClass']
-	# 	for region in self.view.sel():  #get user selection
-	# 		if not region.empty():  #if selection not empty then
-	# 			s = self.view.substr(region)  #assign s variable the selected region
-	# 			# print(s)
-	# 			linesList = s.splitlines()
-	# 			notes = self.getNotes(linesList)
-	# 			for k, v in notes.items():
-	# 				print(k, v)
-	# 				v = markdown2.markdown(v, extras=["cuddled-lists"])  # or use `html = markdown_path(PATH)`
-	# 				k = markdown2.markdown(k, extras=["cuddled-lists"])  # or use `html = markdown_path(PATH)`
-	# 				# print( markdown2.markdown('Use the `printf()` function.') )
+	# 	# r = Model('知识点-Basic (Leaflyer)')
+	# 	# print(AnkiResource().getModelNames())
+	# 	# print(r.name, r.fields)
+	# 	# r.printfields()
+	# 	# content_dict = {"问题":"one","答案":"two",'笔记':"ddd",'相关知识':"d"}
+	# 	# note = Notes("Default", '知识点-Basic (Leaflyer)')
+	# 	# dic = note.fields_dict
+	# 	# print(json.dumps(dic, indent = 4))
 
-	# 				Note.add(deckName, ModelName, k, v,tags )
-	# 			# self.view.replace(edit, region, news) #replace content in view
-	# 			a = 'I did these things:\n* bullet1\n* bullet2\n* bullet3\n'
-	# 			print(markdown2.markdown(a, extras=["cuddled-lists"]))
-	# 		else:
-	# 			print('空的region')
+	# 	# t = Template('deck1', '知识点-Basic (Leaflyer)').new()
+	# 	# print(t)
+
+	# 	# print(t_note)
+	# 	n = Notes(t_note)
+	# 	# print(n.deck)
+	# 	# print(n.tags)
+	# 	# deckName = 'Programing&Algorithm'
+	# 	# ModelName = '知识点-Basic (Leaflyer)'
+	# 	# Note.add(deckName, ModelName, 'QQ', 'AA',['tags'] )
+	# 	# print()
+	# 	# print('——————')
+	# 	# for key,value in n.fields_dict.items():
+	# 	# 	print(key)
+	# 	# 	print('*')
+	# 	# 	print(value)
+	# 	# 	print('****')
+	# 	# print(n.deck)
+	# 	# print(n.tags)
+	# 	# print(n.model)
+	# 	n.sendNote()
+	# 	print(n.sendNote())
+
+	def run(self, edit):   #implement run method
+		# x = AnkiResource()
+		# print (ForTest.ModelNameList ())
+		# ForTest.ModelNameList ()
+
+		# print(x.getDeckNames())
+		# deckName = 'Programing&Algorithm'
+		# ModelName = '知识点-Basic (Leaflyer)'
+		# tags = ['InnerClass']
+		for region in self.view.sel():  #get user selection
+			if not region.empty():  #if selection not empty then
+				s = self.view.substr(region)  #assign s variable the selected region
+				# print(s)
+				# print(s)
+				n = Notes(s)
+				n.sendNote()
+				# linesList = s.splitlines()
+				# notes = self.getNotes(linesList)
+				# for k, v in notes.items():
+				# 	print(k, v)
+				# 	v = markdown2.markdown(v, extras=["cuddled-lists"])  # or use `html = markdown_path(PATH)`
+				# 	k = markdown2.markdown(k, extras=["cuddled-lists"])  # or use `html = markdown_path(PATH)`
+				# 	# print( markdown2.markdown('Use the `printf()` function.') )
+
+				# 	Note.add(deckName, ModelName, k, v,tags )
+				# # self.view.replace(edit, region, news) #replace content in view
+				# # a = 'I did these things:\n* bullet1\n* bullet2\n* bullet3\n'
+				# # print(markdown2.markdown(a, extras=["cuddled-lists"]))
+			else:
+				print('空的region')
 
 
 	def getNotes(self, listOfLines):
