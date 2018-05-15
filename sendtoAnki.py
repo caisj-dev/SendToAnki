@@ -1,5 +1,5 @@
 #TechSideOnline.com Webify Sublime Text 3 plugin example
-from .AnkiResource import AnkiResource,Note,MyHelper,ForTest,Resource,Model,Notes,Template
+from .AnkiResource import AnkiResource,Note,MyHelper,ForTest,Resource,Model,Notes,Template,NoteBook
 # from .Markdown2 import Markdown
 # import urllib
 import requests
@@ -20,20 +20,12 @@ class InsertNoteFieldBySyntaxCommand(sublime_plugin.TextCommand):
 		# this will populate the quick_panel with models of markdown formats
 		# self.list = self.getParsedModel()
 		self.deckList = MyHelper.parseDeckName2List()
-		# self.deckList =
+
 		#show  the above list in the panel,
 		#self.on_done is called when one  of the item was chosen by user
 		self.view.window().show_quick_panel(self.deckList, self.on_done,1, 0)
 		# MyHelper.parseMDCardInfo('model:dab')
-		# decksLst =
-		# for deck in decksLst:
-		# 	print(deck)
 
-
-	# 	items = ['Text', 'Another']
-	# 	self.view.show_popup_menu(items, self.on_done)
-	# def on_done(self, result):
-	# 	print(result)
 
 	def on_done(self, index):
 		#  if user cancels with Esc key, do nothing
@@ -74,130 +66,61 @@ class InsertMyText(sublime_plugin.TextCommand):
 
 
 class SendToAnkiCommand(sublime_plugin.TextCommand): #create Webify Text Command
-	# def run(self, edit):   #implement run method
-
-	# 	# r = Model('知识点-Basic (Leaflyer)')
-	# 	# print(AnkiResource().getModelNames())
-	# 	# print(r.name, r.fields)
-	# 	# r.printfields()
-	# 	# content_dict = {"问题":"one","答案":"two",'笔记':"ddd",'相关知识':"d"}
-	# 	# note = Notes("Default", '知识点-Basic (Leaflyer)')
-	# 	# dic = note.fields_dict
-	# 	# print(json.dumps(dic, indent = 4))
-
-	# 	# t = Template('deck1', '知识点-Basic (Leaflyer)').new()
-	# 	# print(t)
-
-	# 	# print(t_note)
-	# 	n = Notes(t_note)
-	# 	# print(n.deck)
-	# 	# print(n.tags)
-	# 	# deckName = 'Programing&Algorithm'
-	# 	# ModelName = '知识点-Basic (Leaflyer)'
-	# 	# Note.add(deckName, ModelName, 'QQ', 'AA',['tags'] )
-	# 	# print()
-	# 	# print('——————')
-	# 	# for key,value in n.fields_dict.items():
-	# 	# 	print(key)
-	# 	# 	print('*')
-	# 	# 	print(value)
-	# 	# 	print('****')
-	# 	# print(n.deck)
-	# 	# print(n.tags)
-	# 	# print(n.model)
-	# 	n.sendNote()
-	# 	print(n.sendNote())
-
 	def run(self, edit):   #implement run method
-		# x = AnkiResource()
-		# print (ForTest.ModelNameList ())
-		# ForTest.ModelNameList ()
-
-		# print(x.getDeckNames())
-		# deckName = 'Programing&Algorithm'
-		# ModelName = '知识点-Basic (Leaflyer)'
-		# tags = ['InnerClass']
 		for region in self.view.sel():  #get user selection
 			if not region.empty():  #if selection not empty then
-				s = self.view.substr(region)  #assign s variable the selected region
-				# print(s)
-				# print(s)
-				n = Notes(s)
-				n.sendNote()
-				# linesList = s.splitlines()
-				# notes = self.getNotes(linesList)
-				# for k, v in notes.items():
-				# 	print(k, v)
-				# 	v = markdown2.markdown(v, extras=["cuddled-lists"])  # or use `html = markdown_path(PATH)`
-				# 	k = markdown2.markdown(k, extras=["cuddled-lists"])  # or use `html = markdown_path(PATH)`
-				# 	# print( markdown2.markdown('Use the `printf()` function.') )
-
-				# 	Note.add(deckName, ModelName, k, v,tags )
-				# # self.view.replace(edit, region, news) #replace content in view
-				# # a = 'I did these things:\n* bullet1\n* bullet2\n* bullet3\n'
-				# # print(markdown2.markdown(a, extras=["cuddled-lists"]))
-			else:
-				print('空的region')
+				sel_str = self.view.substr(region)  #assign s variable the selected region
+				notes = NoteBook(sel_str)
+				notes.send()
 
 
-	def getNotes(self, listOfLines):
-		"""
-		A note includes Question field and Answer field.
-		For list of lines, which includes many notes.
-		each note may has multiple Question lines,
-		and the vary first one starts with Syntax '#',
-		followed by Answer lines, whose vary first line
-		starts with'##'
 
-		retun a dictionry:
-			Key:Question
-			Value: Answer
+	# def getNotes(self, listOfLines):
 
-		"""
-		p = 0
-		i = 0
-		notesDict = dict()
-		while p < len(listOfLines):
-			s = ''
-			questionList = []
-			answerList = []
-			# if not MyHelper.isQusetionSyntax(listOfLines[p]):
-			# 	p += 1
-			# 	continue
+	# 	p = 0
+	# 	i = 0
+	# 	notesDict = dict()
+	# 	while p < len(listOfLines):
+	# 		s = ''
+	# 		questionList = []
+	# 		answerList = []
+	# 		# if not MyHelper.isQusetionSyntax(listOfLines[p]):
+	# 		# 	p += 1
+	# 		# 	continue
 
-			print(i)
-			if MyHelper.isQusetionSyntax(listOfLines[i]):
-				i = p
-				while not MyHelper.isAnswerSyntax(listOfLines[i]):
-					#ignore the Syntax line
-					if MyHelper.isQusetionSyntax(listOfLines[i]):
-						i += 1
-						continue
-					print('Entering Question text')
-					questionList.append( listOfLines[i] )
-					questionList.append( '\n')
-					i += 1
-				# get one note's Question
-				questionString = s.join(questionList)
-				print(questionString)
-			while not MyHelper.isQusetionSyntax(listOfLines[i]):
-				#ignore the Syntax line
-				if MyHelper.isAnswerSyntax(listOfLines[i]):
-					i += 1
-					continue
-				print('Entering answer text')
-				answerList.append( listOfLines[i] )
-				answerList.append( '\n')
-				i += 1
-				if (i >= len(listOfLines)):
-					break
-			answerString = s.join(answerList)
-			print(answerString)
-			notesDict[questionString] = answerString
-			p = i
-			# p = p + 1
-		print('EddND')
-		return notesDict
+	# 		print(i)
+	# 		if MyHelper.isQusetionSyntax(listOfLines[i]):
+	# 			i = p
+	# 			while not MyHelper.isAnswerSyntax(listOfLines[i]):
+	# 				#ignore the Syntax line
+	# 				if MyHelper.isQusetionSyntax(listOfLines[i]):
+	# 					i += 1
+	# 					continue
+	# 				print('Entering Question text')
+	# 				questionList.append( listOfLines[i] )
+	# 				questionList.append( '\n')
+	# 				i += 1
+	# 			# get one note's Question
+	# 			questionString = s.join(questionList)
+	# 			print(questionString)
+	# 		while not MyHelper.isQusetionSyntax(listOfLines[i]):
+	# 			#ignore the Syntax line
+	# 			if MyHelper.isAnswerSyntax(listOfLines[i]):
+	# 				i += 1
+	# 				continue
+	# 			print('Entering answer text')
+	# 			answerList.append( listOfLines[i] )
+	# 			answerList.append( '\n')
+	# 			i += 1
+	# 			if (i >= len(listOfLines)):
+	# 				break
+	# 		answerString = s.join(answerList)
+	# 		print(answerString)
+	# 		notesDict[questionString] = answerString
+	# 		p = i
+	# 		# p = p + 1
+	# 	print('EddND')
+	# 	return notesDict
 
 
 

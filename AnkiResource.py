@@ -81,13 +81,6 @@ class Model:
 
 	#return fields of a model
 	def getFields(self):
-		# params = {"modelName": self.name}
-		# r = Resource('modelFieldNames', params)
-		# if r.response != {}:
-		# 	return r.response.get('result')
-		# else:
-		# 	return []
-
 		params ={ "modelName": self.name}
 		modelFieldNameDict = AnkiResource().getModelFieldNames(params)
 		# print(modelFieldNameDict)
@@ -115,14 +108,15 @@ class Notes:
 			res = pat.search(body)
 			if res != None:
 				res = res.group(1)
-				d[field] = res
+				d[field] = markdown2.markdown(res, extras=["cuddled-lists"])
 			else:
-				st = '##{0}\n([\s\S]+?)\n--'.format(field)
+				# the last field
+				st = '##{0}\n([\s\S]+?)\n======'.format(field)
 				pat = re.compile(r'{0}'.format(st))
 				res = pat.search(body)
 				if res != None:
 					res = res.group(1)
-					d[field] = res
+					d[field] = markdown2.markdown(res, extras=["cuddled-lists"])
 				else:
 					d[field] = ''
 		return d
@@ -154,7 +148,7 @@ class Notes:
 		return res_tag
 
 	def sendNote(self):
-		print('sendNote:'+self.deck)
+		# print('sendNote:'+self.deck)
 		params = {
 				'note':{
 						'deckName' :self.deck,
@@ -186,10 +180,10 @@ class Template:
 		print(len(self.fields_list))
 		if len(self.fields_list) != 0:
 			info_list = []
-			info_list.append('-----------------------')
+			# info_list.append('============================')
 			info_list.append('Deck:'+ self.deck  )
 			info_list.append('Model:'+ self.model )
-			info_list.append('-----------------------\n')
+			info_list.append('----------------------------\n')
 			str  = '\n'
 			info_string = str.join(info_list)
 
@@ -199,7 +193,7 @@ class Template:
 
 			for field in self.fields_list:
 				body_list.append('##' + field)
-			body_list.append('------------------------\n')
+			body_list.append('============================\n')
 			# seperate by two line, easy to read in MarkDown
 			str  = '\n\n'
 			note_string = str.join(body_list)
@@ -209,6 +203,22 @@ class Template:
 			return note_string
 		else:
 			return ''
+class NoteBook:
+	def __init__(self, body):
+		self.body = body
+
+	def send(self):
+		pat = re.compile(r'\n===========')
+		res_spli = pat.split(self.body)
+		leng = len(res_spli )
+		print(leng)
+		i = 0
+		for a_note_str in res_spli:
+			i += 1
+			#discard the last item in res_spli
+			if i == leng :
+				break
+			Notes(a_note_str).sendNote()
 
 class Note:
 	def __init__(self):
