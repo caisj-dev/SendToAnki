@@ -26,7 +26,6 @@ class InsertNoteFieldBySyntaxCommand(sublime_plugin.TextCommand):
 		self.view.window().show_quick_panel(self.deckList, self.on_done,1, 0)
 		# MyHelper.parseMDCardInfo('model:dab')
 
-
 	def on_done(self, index):
 		#  if user cancels with Esc key, do nothing
 		#  if canceled, index is returned as  -1
@@ -124,12 +123,3 @@ class SendToAnkiCommand(sublime_plugin.TextCommand): #create Webify Text Command
 
 
 
-
-class TestCommand(sublime_plugin.TextCommand):  #Test command
-	def run(self, edit):
-		for region in self.view.sel():
-			if not region.empty():
-				s = self.view.substr(region)
-				news = s.replace('&lt;', '<')  #reversed from Webify
-				news = news.replace('&gt;', '>')  #reversed from Webify
-				self.view.replace(edit, region, news)
