@@ -8,8 +8,6 @@ import  markdown2
 API_VERSION = 5
 API_URL     = 'http://localhost:8765'
 
-
-
 class AnkiResource:
 	def __init__(self):
 		pass
@@ -75,7 +73,7 @@ class Resource:
 class Model:
 	def __init__(self, name):
 		#model name
-		self.name = name
+		self.name   = name
 		#model fields in a list
 		self.fields = self.getFields()
 		#model content in a dictionary
@@ -94,18 +92,31 @@ class Model:
 			print(field)
 
 class Notes:
-	def __init__(self, deck, model, content, tags):
-		self.model = model
-		self.fields_dict = initFields(model, content)
-		self.deck = deck
-		self.tags = tags
+	def __init__(self, deck, model, body, tags):
+		self.deck        = deck
+		self.model       = Model(model)
+		self.fields_dict = self.initFields(body)
+		# self.fields_dict = fields_dict
 
-	def initFields(self, model, content):
+		self.tags        = tags
+
+		# self.fields_dict = fields_dict
+
+	def initFields(self, body):
 		#new a dict that store each field's content
-		field = dict()
+		field_dict = dict()
 		for field in self.model.fields:
-			d[field] = newContent_fromcontent
-		return field
+			field_dict[field] = content_dict[field]
+		return field_dict
+
+	# return body of note, dict
+	def parseTXT2Fields(body):
+		d = {}
+		#pat =  '##{0}([.\n]+)##{0}|##([.\n]+)---'.format(field,field)
+		for field in self.model.fields:
+			pat =  '##{0}\n([.\n]+)##|##{0}([.\n]+)---'.format(field)
+			regex = re.compile(r'{0}'.format(pat))
+			rematch = regex.match(body)
 
 	def sendNote(self):
 		note = {'note':{'deckName':self.deck,
@@ -118,6 +129,42 @@ class Notes:
 		r = Resource('addNote', note)
 		if r.response != {}:
 			return r.response.get('result')
+
+
+#creat new Template by the givin model and deck.
+class Template:
+	def __init__(self, deck, model):
+		self.deck  = deck
+		self.model = Model(model)
+	#return a template string.
+	def new(self):
+		fields_list = self.model.fields
+		print(len(fields_list))
+		if len(fields_list) != 0:
+			info_list = []
+			info_list.append('-----------------------')
+			info_list.append('deck:'+ self.deck  )
+			info_list.append('Model:'+ self.model.name  )
+			info_list.append('-----------------------\n')
+			str  = '\n'
+			info_string = str.join(info_list)
+
+			body_list = []
+			# add Tag
+			body_list.append('##Tag')
+
+			for field in fields_list:
+				body_list.append('##' + field)
+			body_list.append('------------------------\n')
+			# seperate by two line, easy to read in MarkDown
+			str  = '\n\n'
+			note_string = str.join(body_list)
+
+			note_string = info_string + note_string
+			print(note_string)
+			return note_string
+		else:
+			return ''
 
 class Note:
 	def __init__(self):
@@ -156,28 +203,28 @@ class Note:
 		##Other  Knowledge
 	def cardModel2MarkdowndSyntax( modelName,deckName):
 		mfList =MyHelper.parseCardModelFields2List(modelName)
-		mfStartList = []
-		mfStartList.append('-----------------------')
-		mfStartList.append('deck:'+ deckName  )
-		mfStartList.append('Model:'+ modelName  )
-		mfStartList.append('-----------------------\n')
+		info_list = []
+		info_list.append('-----------------------')
+		info_list.append('deck:'+ deckName  )
+		info_list.append('Model:'+ modelName  )
+		info_list.append('-----------------------\n')
 		str  = '\n'
-		mfStartString = str.join(mfStartList)
+		mfStartString = str.join(info_list)
 
-		mfListTemp = []
+		body_list = []
 		# #add Tag
-		mfListTemp.append('##Tag')
+		body_list.append('##Tag')
 		for field in mfList:
-			mfListTemp.append('##'+field)
-		mfListTemp.append('------------------------\n')
+			body_list.append('##'+field)
+		body_list.append('------------------------\n')
 		# seperate by two line, easy to read in MarkDown
 		str  = '\n\n'
-		mfString = str.join(mfListTemp)
+		note_string = str.join(body_list)
 
-		mfString = mfStartString + mfString
-		print(mfString)
-		return mfString
-		# mfList = mfStartList + mfListTemp
+		note_string = mfStartString + note_string
+		print(note_string)
+		return note_string
+		# mfList = info_list + body_list
 # c = Card('deck','le','Q','A')
 class MyHelper:
 	def isQusetionSyntax(line):
