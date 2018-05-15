@@ -86,7 +86,40 @@ class SendToAnkiCommand(sublime_plugin.TextCommand): #create Webify Text Command
 		# print(json.dumps(dic, indent = 4))
 
 		t = Template('deck1', '知识点-Basic (Leaflyer)').new()
-		print(type(t))
+		# print(t)
+		t_note ='''-----------------------
+Deck:AnKindle
+Model:知识点-Basic (Leaflyer)
+-----------------------
+##Tags
+tagtest
+##问题
+question...
+##答案
+answer...
+##笔记
+note
+##相关知识
+
+------------------------'''
+		# print(t_note)
+		n = Notes(t_note)
+		print(n.deck)
+		print(n.tags)
+
+		Note.add('Programing&Algorith', '识点-Basic (Leaflyer)', 'QQ', 'AA','tags' )
+		# print()
+		# print('——————')
+		# for key,value in n.fields_dict.items():
+		# 	print(key)
+		# 	print('*')
+		# 	print(value)
+		# 	print('****')
+		# print(n.deck)
+		# print(n.tags)
+		# print(n.model)
+		# n.sendNote()
+		# print(n.sendNote())
 
 	# def run(self, edit):   #implement run method
 	# 	x = AnkiResource()

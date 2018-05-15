@@ -16,14 +16,14 @@ class AnkiResource:
 		# request = json.dumps([ action, params ])
 		try:
 			r = requests.post("http://127.0.0.1:8765", json=
-												{
-												    "action": action,
-												    "version": 5,
-												    "params": params
-												}
+											{
+												"action": action,
+												"version": 5,
+												"params": params
+											}
 						)
-		except ConnectionRefusedError:
-			return None
+		except requests.exceptions.ConnectionError:
+			return {}
 
 		else:
 			print(r.json())
@@ -92,43 +92,89 @@ class Model:
 			print(field)
 
 class Notes:
-	def __init__(self, deck, model, body, tags):
-		self.deck        = deck
-		self.model       = Model(model)
-		self.fields_dict = self.initFields(body)
+	def __init__(self, body):
+		self.deck        = self.parseDeckName(body)
+		self.model       = Model(self.parseModelName(body))
+		self.fields_dict = self.parseTXT2Fields(body)
 		# self.fields_dict = fields_dict
 
-		self.tags        = tags
-
-		# self.fields_dict = fields_dict
-
-	def initFields(self, body):
-		#new a dict that store each field's content
-		field_dict = dict()
-		for field in self.model.fields:
-			field_dict[field] = content_dict[field]
-		return field_dict
+		self.tags        = self.parseTags(body)
 
 	# return body of note, dict
-	def parseTXT2Fields(body):
+	def parseTXT2Fields(self, body):
 		d = {}
 		#pat =  '##{0}([.\n]+)##{0}|##([.\n]+)---'.format(field,field)
 		for field in self.model.fields:
-			pat =  '##{0}\n([.\n]+)##|##{0}([.\n]+)---'.format(field)
-			regex = re.compile(r'{0}'.format(pat))
-			rematch = regex.match(body)
+			# st = '##{0}\n([\s\S]+)##'.format(field)
+			pat = re.compile(r'{0}'.format('##{0}\n([\s\S]+?)##'.format(field)))
+
+			res = pat.search(body) 
+			if res != None:
+				res = res.group(1)
+				d[field] = res
+			else:
+				st = '##{0}\n([\s\S]+?)\n--'.format(field)
+				pat = re.compile(r'{0}'.format(st))
+				res = pat.search(body) 
+				if res != None:
+					res = res.group(1)
+					d[field] = res
+				else:
+					d[field] = ''
+		return d
+
+	def parseModelName(self, body):
+		pat = re.compile(r'{0}'.format('Model:([\s\S]+?)\n'))
+		res_model = pat.search(body)
+		if res_model != None:
+			res_model = res_model.group(1)
+		else:
+			return ''
+		return res_model
+
+	def parseDeckName(self, body):
+		pat = re.compile(r'{0}'.format('Deck:([\s\S]+?)\n'))
+		res_deck = pat.search(body)
+		if res_deck != None:
+			res_deck = res_deck.group(1)
+		else:
+			return ''
+		return res_deck
+
+	def parseTags(self, body):
+		pat = re.compile(r'{0}'.format('##Tags([\s\S]+?)##'))
+		res_tag = pat.search(body)
+		if res_tag != None:
+			res_tag = res_tag.group(1)
+		else:
+			return ''
+		return res_tag
 
 	def sendNote(self):
-		note = {'note':{'deckName':self.deck,
-						'modelName':self.model,
-						'fields':self.fields_dict,
-						'tags':self.tags
+		# print(self.deck)
+		# # print(self.model)
+		# print(self.tags)
+		# print(type(self.fields_dict))
+		
+
+
+		params = {'note':{'deckName':'Programing&Algorithm',
+						'modelName':'知识点-Basic (Leaflyer)',
+						'fields':{
+							'问题': 'question',
+							'答案': 'answer',
+							'笔记': '',
+							'相关知识': ''
+							},
+						'tags':'tags'
 						}
 				}
-
-		r = Resource('addNote', note)
-		if r.response != {}:
-			return r.response.get('result')
+		r = AnkiResource()
+		r.addNote(params)
+		
+		# r = Resource('addNote', params)
+		# if r.response != {}:
+		# 	return r.response.get('result')
 
 
 #creat new Template by the givin model and deck.
@@ -151,7 +197,7 @@ class Template:
 
 			body_list = []
 			# add Tag
-			body_list.append('##Tag')
+			body_list.append('##Tags')
 
 			for field in fields_list:
 				body_list.append('##' + field)
