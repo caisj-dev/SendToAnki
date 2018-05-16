@@ -138,6 +138,7 @@ class Notes:
 		else:
 			return ''
 		return res_deck
+
 	#TODO： return list of tags
 	def parseTags(self, body):
 		res_tag = []
@@ -180,7 +181,6 @@ class Template:
 		print(len(self.fields_list))
 		if len(self.fields_list) != 0:
 			info_list = []
-			# info_list.append('============================')
 			info_list.append('Deck:'+ self.deck  )
 			info_list.append('Model:'+ self.model )
 			info_list.append('----------------------------\n')

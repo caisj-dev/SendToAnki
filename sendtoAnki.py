@@ -24,7 +24,6 @@ class InsertNoteFieldBySyntaxCommand(sublime_plugin.TextCommand):
 		#show  the above list in the panel,
 		#self.on_done is called when one  of the item was chosen by user
 		self.view.window().show_quick_panel(self.deckList, self.on_done,1, 0)
-		# MyHelper.parseMDCardInfo('model:dab')
 
 	def on_done(self, index):
 		#  if user cancels with Esc key, do nothing
@@ -36,7 +35,7 @@ class InsertNoteFieldBySyntaxCommand(sublime_plugin.TextCommand):
 		#get model list from anki in MD format
 		self.modelList = self.getParsedModel()
 		# show modellist panel
-		self.view.window().show_quick_panel(self.modelList, self.on_done_chose_model,1, 0)
+		self.view.window().show_quick_panel(self.modelList, self.on_done_chose_model,1, 3)
 
 	def on_done_chose_model(self, index):
 		if index ==  -1:
@@ -47,6 +46,12 @@ class InsertNoteFieldBySyntaxCommand(sublime_plugin.TextCommand):
 		"args":
 			{'text': self.modelList[index][1]}
 		})
+		# self.view.run_command(
+		# "move_cursor",{})
+
+
+
+
 
 	#get a list of model from  anki, each of them  are parsed into Markdown
 	def getParsedModel(self):
@@ -59,9 +64,21 @@ class InsertNoteFieldBySyntaxCommand(sublime_plugin.TextCommand):
 			parsedModel.append([model,Template(deck, model).new()])
 		return parsedModel
 
+
+
 class InsertMyText(sublime_plugin.TextCommand):
 	 def run(self, edit, args):
-	 	self.view.insert(edit, self.view.sel()[0].begin(), args['text'])
+	 	line = 1
+	 	#move the cursor to the begin of document, personal preference
+	 	point = self.view.text_point(line - 1, 0)
+	 	self.view.insert(edit, point, args['text'])
+
+class MoveCursorCommand(sublime_plugin.TextCommand):
+	 def run(self, edit, args):
+	 	line = 5
+	 	#move the cursor to the begin of document, personal preference
+	 	point = self.view.text_point(line - 1, 0)
+	 	self.view.insert(edit, point,'')
 
 
 class SendToAnkiCommand(sublime_plugin.TextCommand): #create Webify Text Command
