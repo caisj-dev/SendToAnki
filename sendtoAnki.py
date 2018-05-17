@@ -1,5 +1,5 @@
 #TechSideOnline.com Webify Sublime Text 3 plugin example
-from .AnkiResource import AnkiResource,Note,MyHelper,ForTest,Resource,Model,Notes,Template,NoteBook
+from .AnkiResource import AnkiResource,Note,MyHelper,ForTest,Model,Notes,Template,NoteBook,Resource
 # from .Markdown2 import Markdown
 # import urllib
 import requests
@@ -13,9 +13,9 @@ import jinja2
 import markdown2
 
 class InsertNoteFieldBySyntaxCommand(sublime_plugin.TextCommand):
-	deckList = []
-	deck = ''
-	model = ''
+	# deckList = []
+	# deck = ''
+	# model = ''
 	def run(self, edit):
 		# this will populate the quick_panel with models of markdown formats
 		# self.list = self.getParsedModel()
@@ -88,7 +88,11 @@ class SendToAnkiCommand(sublime_plugin.TextCommand): #create Webify Text Command
 				sel_str = self.view.substr(region)  #assign s variable the selected region
 				notes = NoteBook(sel_str)
 				notes.send()
-
+				sublime.status_message('ok')
+		# res = Resource('5','知识点-Mix (Leaflyer)').res
+		# print(type(res))
+		# print(res['result'])
+		print(Model('知识点-Mix (Leaflyer)').fields)
 
 
 	# def getNotes(self, listOfLines):

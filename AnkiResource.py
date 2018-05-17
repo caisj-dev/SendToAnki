@@ -5,8 +5,8 @@ import re
 import requests
 import  markdown2
 # import items
-API_VERSION = 5
-API_URL     = 'http://localhost:8765'
+# API_VERSION = 5
+# API_URL     = 'http://localhost:8765'
 
 class AnkiResource:
 	def __init__(self):
@@ -23,24 +23,25 @@ class AnkiResource:
 											}
 						)
 		except requests.exceptions.ConnectionError:
+			print('无法连接AnkiConnect端口，请安装该插件后重启Anki')
 			return {}
 
 		else:
 			print(r.json())
 			#return a dictionay
 			print(type(r.json()))
-
+			print('已连接Anki，正在处理结果...')
 			return r.json()
-	#添加Card=Note
+
 	def addNote(self, params):
 		if params:
 			return self.makeRequest('addNote', params);
 
-	# 所有模板名
+	# return all the model name in a dict
 	def getModelNames(self):
 		return self.makeRequest('modelNames');
 
-	# 某个模板的所有field
+	# return a model field in a dict
 	def getModelFieldNames(self, params):
 # 		params ={ "modelName":'知识点-Mix (Leaflyer)'}
 #		x.getModelFieldNames(params)
@@ -55,22 +56,45 @@ class AnkiResource:
 		return self.makeRequest('deckNames');
 
 class Resource:
-	def __init__(self, action, params={}):
-		try:
-			self.response = requests.post(API_URL, json = self.request(action, params))
-			self.response = self.response.json()
-		except requests.exceptions.ConnectionError:
-			print('无法连接AnkiConnect端口，请安装该插件后重启Anki')
-			self.response = {}
+
+	def __init__(self, command, something=[]):
+		# These command are based on the API of AnkiConnect
+		# For more detail, see https://foosoft.net/projects/anki-connect/
+		self.res = {}
+		req_CMD ={
+				1 : ['version',  	    {}],
+				2 : ['sync',  			{}],
+				3 : ['modelNames',      {}],
+				4 : ['deckNames', 	    {}],
+				# 'something' should be str type
+				5 : ['modelFieldNames', { "modelName": something}],
+				##'something' should be dict type
+				6 : ['addNote',    	    { "note": something}],
+				##'something' should be list type
+				7 : ['canAddNotes', 	{ "notes": something}],
+				8 : ['updateNoteFields',{ "notes": something}],
+		}
+		if command in req_CMD:
+			action = req_CMD[command][0]
+			params = req_CMD[command][1]
+			self.res = self.make_a_request(action, params)
 		else:
-			# print(self.response)
-			if len(self.response) == 2:
+			self.res = {}
+
+	def make_a_request(self, action, params):
+		res = {}
+		try:
+			res = requests.post("http://127.0.0.1:8765", json = {'action': action,
+																 'params': params,
+																 'version': 5})
+			res = res.json()
+		except requests.exceptions.ConnectionError:
+			print('无法连接AnkiConnect端口')
+			return res
+		else:
+			if len(res) == 2:
 				print('已连接Anki，正在处理结果...')
-
-	def request(self, action, params):
-		return {'action': action, 'params': params, 'version': API_VERSION}
-
-
+				return res
 
 class Model:
 	def __init__(self, name):
@@ -81,13 +105,13 @@ class Model:
 
 	#return fields of a model
 	def getFields(self):
-		params ={ "modelName": self.name}
-		modelFieldNameDict = AnkiResource().getModelFieldNames(params)
+		# params ={ "modelName": self.name}
+		dic = Resource(3).res
 		# print(modelFieldNameDict)
-		if 'result' in modelFieldNameDict:
+		if 'result' in dic:
 			# print(modelNameDict.get('result'))
-			modelFieldNameList=  modelFieldNameDict.get('result')
-		return modelFieldNameList
+			li =  dic.get('result')
+		return li
 
 
 class Notes:
@@ -120,7 +144,7 @@ class Notes:
 				else:
 					d[field] = ''
 		return d
-
+	# return model name from sublime text
 	def parseModelName(self, body):
 		pat = re.compile(r'{0}'.format('Model:([\s\S]+?)\n'))
 		res_model = pat.search(body)
@@ -145,27 +169,30 @@ class Notes:
 		pat = re.compile(r'{0}'.format('##Tags([\s\S]+?)##'))
 		res = pat.search(body)
 		if res != None:
-			res_tag.append(res.group(1))
+			pat = re.compile(r',')
+			res_spli = pat.split(res.group(1))
+
+			res_tag = res_spli
 		return res_tag
 
 	def sendNote(self):
 		# print('sendNote:'+self.deck)
 		params = {
-				'note':{
-						'deckName' :self.deck,
-						'modelName':self.model.name,
-						'fields'   :self.fields_dict,
-						'tags'     :self.tags_list
-						}
+					'note':{
+							'deckName' :self.deck,
+							'modelName':self.model.name,
+							'fields'   :self.fields_dict,
+							'tags'     :self.tags_list
+							}
 				}
 		r = AnkiResource()
 		r.addNote(params)
 
 		#if has non-empty string in result
-		# if r.response.get('result'):
+		# if r.res.get('result'):
 		# 	self.is_sent = True
-		# 	print(r.response.get('result'))
-		# 	print (bool(r.response.get('error')))
+		# 	print(r.res.get('result'))
+		# 	print (bool(r.res.get('error')))
 
 
 #creat new Template by the givin model and deck.
@@ -309,11 +336,13 @@ class MyHelper:
 
 	#parse the deck name from Anki resource to string format
 	def parseDeckName2List():
+		deckNameList = []
 		deckNameDict = AnkiResource().getDeckNames()
 		# for key,values in  ModelNamedict.items():
 		if 'result' in deckNameDict:
 			deckNameList=  deckNameDict.get('result')
 		return deckNameList
+
 	# example:
 	#modelName ='知识点-Mix (Leaflyer)'
 	def parseCardModelFields2List(modelName):
@@ -393,9 +422,9 @@ class ForTest:
 # # data = urllib.parse.urlencode(values)
 # # # data = data.encode('ascii') # data should be bytes
 # # req = urllib.request.Request(url, values)
-# # with urllib.request.urlopen(req) as response:
-# #    the_page = response.read()
+# # with urllib.request.urlopen(req) as res:
+# #    the_page = res.read()
 # # print(the_page)
-# with urllib.request.urlopen(url,params) as response:
-#     r = response.read() # Returns http.client.HTTPResponse.
+# with urllib.request.urlopen(url,params) as res:
+#     r = res.read() # Returns http.client.HTTPres.
 # print(r)
