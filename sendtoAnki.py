@@ -1,5 +1,5 @@
 #TechSideOnline.com Webify Sublime Text 3 plugin example
-from .AnkiResource import AnkiResource,Note,MyHelper,ForTest,Model,Notes,Template,NoteBook,Resource
+from .AnkiResource import Note,Model,Models,Decks,Template,NoteBook,Resource
 # from .Markdown2 import Markdown
 # import urllib
 import requests
@@ -19,7 +19,7 @@ class InsertNoteFieldBySyntaxCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
 		# this will populate the quick_panel with models of markdown formats
 		# self.list = self.getParsedModel()
-		self.deckList = MyHelper.parseDeckName2List()
+		self.deckList = Decks().name_list
 
 		#show  the above list in the panel,
 		#self.on_done is called when one  of the item was chosen by user
@@ -49,22 +49,17 @@ class InsertNoteFieldBySyntaxCommand(sublime_plugin.TextCommand):
 		# self.view.run_command(
 		# "move_cursor",{})
 
-
-
-
-
 	#get a list of model from  anki, each of them  are parsed into Markdown
 	def getParsedModel(self):
 		parsedModel =[]
 		#get all model names in list
-		modelList = MyHelper.parseModelName2List()
+		# modelList = MyHelper.parseModelName2List()
+		modelList = Models().name_list
 		deck = self.deck
 		#parse each of the model in the list
 		for model in modelList:
 			parsedModel.append([model,Template(deck, model).new()])
 		return parsedModel
-
-
 
 class InsertMyText(sublime_plugin.TextCommand):
 	 def run(self, edit, args):
@@ -80,7 +75,6 @@ class MoveCursorCommand(sublime_plugin.TextCommand):
 	 	point = self.view.text_point(line - 1, 0)
 	 	self.view.insert(edit, point,'')
 
-
 class SendToAnkiCommand(sublime_plugin.TextCommand): #create Webify Text Command
 	def run(self, edit):   #implement run method
 		for region in self.view.sel():  #get user selection
@@ -93,7 +87,7 @@ class SendToAnkiCommand(sublime_plugin.TextCommand): #create Webify Text Command
 		# print(type(res))
 		# print(res['result'])
 		print(Model('知识点-Mix (Leaflyer)').fields)
-
+		print()
 
 	# def getNotes(self, listOfLines):
 
