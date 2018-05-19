@@ -46,6 +46,7 @@ class InsertNoteFieldBySyntaxCommand(sublime_plugin.TextCommand):
         "args":
             {'text': self.modelList[index][1]}
         })
+
         # self.view.run_command(
         # "move_cursor",{})
 
@@ -67,6 +68,7 @@ class InsertMyText(sublime_plugin.TextCommand):
         #move the cursor to the begin of document, personal preference
         point = self.view.text_point(line - 1, 0)
         self.view.insert(edit, point, args['text'])
+        self.view.show(point)
 
 class MoveCursorCommand(sublime_plugin.TextCommand):
      def run(self, edit, args):
