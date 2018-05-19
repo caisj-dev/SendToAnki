@@ -101,6 +101,6 @@ class SendToAnkiCommand(sublime_plugin.TextCommand): #create Webify Text Command
         # # for rg in rgs:
         # # self.view.insert(edit, rg.b, 'YES')
 
-    # def is_empty_match(self, match):
-    #     return match is None
+    def is_empty_match(self, match):
+        return match is None
 
