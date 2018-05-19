@@ -4,56 +4,68 @@ import re
 # import asyncio
 import requests
 import  markdown2
-# import items
-# API_VERSION = 5
-# API_URL     = 'http://localhost:8765'
+import time
 
-# class AnkiResource:
-# 	def __init__(self):
-# 		pass
-# 	# sublime.error_message("Could not find a definition")
-# 	def makeRequest(self, action, params={}):
-# 		# request = json.dumps([ action, params ])
-# 		try:
-# 			r = requests.post("http://127.0.0.1:8765", json=
-# 											{
-# 												"action": action,
-# 												"version": 5,
-# 												"params": params
-# 											}
-# 						)
-# 		except requests.exceptions.ConnectionError:
-# 			print('无法连接AnkiConnect端口，请安装该插件后重启Anki')
-# 			return {}
 
+# class Command:
+# 	VERSION           = ['version',  	    {}]
+# 	# MODEL_FIELD_NAMES = ['modelFieldNames', { "modelName": something}]
+
+	# CMDs ={
+	# 			1 : ['version',  	    {}],
+	# 			2 : ['sync',  			{}],
+	# 			3 : ['modelNames',      {}],
+	# 			4 : ['deckNames', 	    {}],
+	# 			# 'something' should be str type
+	# 			5 : ['modelFieldNames', { "modelName": something}],
+	# 			##'something' should be dict type
+	# 			6 : ['addNote',    	    { "note": something}],
+	# 			##'something' should be list type
+	# 			7 : ['canAddNotes', 	{ "notes": something}],
+	# 			8 : ['updateNoteFields',{ "notes": something}],
+	# 	}
+# class Resource(Command):
+# 	_local_port = 'http://127.0.0.1:8765'
+# 	_version = 5
+# 	def __init__(self, cmd, something=[]):
+# 		# These CMDs are based on the API of AnkiConnect
+# 		# For more detail, see https://foosoft.net/projects/anki-connect/
+# 		self.res = {}
+
+# 		if cmd in self.VERSION:
+# 			action = CMDs[cmd][0]
+# 			params = CMDs[cmd][1]
+# 			self.res = self.make_a_request(action, params)
 # 		else:
-# 			print(r.json())
-# 			#return a dictionay
-# 			print(type(r.json()))
-# 			print('已连接Anki，正在处理结果...')
-# 			return r.json()
+# 			self.res = {}
 
-# 	def addNote(self, params):
-# 		if params:
-# 			return self.makeRequest('addNote', params);
+# 	def make_a_request(self, action, params):
+# 		res = {}
+# 		try:
+# 			res = requests.post(Resource._local_port,
+# 											json = {
+# 													'action': action,
+# 													'params': params,
+# 													'version': Resource._version
+# 													})
+# 			res = res.json()
+# 		except requests.exceptions.ConnectionError:
+# 			print('无法连接AnkiConnect端口')
+# 			return res
+# 		else:
+# 			if len(res) == 2:
+# 				print('已连接Anki，正在处理结果...')
+# 				return res
 
-# 	# return all the model name in a dict
-# 	def getModelNames(self):
-# 		return self.makeRequest('modelNames');
 
-# 	# return a model field in a dict
-# 	def getModelFieldNames(self, params):
-# # 		params ={ "modelName":'知识点-Mix (Leaflyer)'}
-# #		x.getModelFieldNames(params)
-# 		return self.makeRequest('modelFieldNames', params);
-# 	# Version
-# 	def getVersion(self,params):
-# 	# return self.makeRequest('version');
-# 		return self.makeRequest(params);
 
-# 	def getDeckNames(self):
-# 	# return self.makeRequest('version');
-# 		return self.makeRequest('deckNames');
+
+
+
+
+
+
+
 
 
 
@@ -79,6 +91,8 @@ class Resource:
 				7 : ['canAddNotes', 	{ "notes": something}],
 				8 : ['updateNoteFields',{ "notes": something}],
 		}
+
+
 		if cmd in CMDs:
 			action = CMDs[cmd][0]
 			params = CMDs[cmd][1]
@@ -142,22 +156,28 @@ class Decks:
 		return li
 
 class Note:
-	def __init__(self, body):
-		self.deck        = self.parseDeckName(body)
-		self.model       = Model(self.parseModelName(body))
-		self.fields_dict = self.parseTXT2Fields(body)
-		self.tags_list   = self.parseTags(body)
+	def __init__(self, noteBody):
+		self.deck        = self.parseDeckName(noteBody)
+		self.model       = Model(self.parseModelName(noteBody))
+		self.fields_dict = self.parseTXT2Fields(noteBody)
+		self.tags_list   = self.parseTags(noteBody)
 		self.is_sent 	 = False
 		self.id 	     = None
-	# return body of note, dict
-	def parseTXT2Fields(self, body):
+		#TODO:
+		#Add new item: record its current position,
+		#input: noteBody
+		#output: point or region
+
+
+	# return noteBody of note, dict
+	def parseTXT2Fields(self, noteBody):
 		d = {}
 		#pat =  '##{0}([.\n]+)##{0}|##([.\n]+)---'.format(field,field)
 		for field in self.model.fields:
 			# st = '##{0}\n([\s\S]+)##'.format(field)
 			pat = re.compile(r'{0}'.format('##{0}\n([\s\S]+?)##'.format(field)))
 
-			res = pat.search(body)
+			res = pat.search(noteBody)
 			if res != None:
 				res = res.group(1)
 				d[field] = markdown2.markdown(res, extras=["cuddled-lists"])
@@ -165,7 +185,7 @@ class Note:
 				# the last field
 				st = '##{0}\n([\s\S]+?)\n======'.format(field)
 				pat = re.compile(r'{0}'.format(st))
-				res = pat.search(body)
+				res = pat.search(noteBody)
 				if res != None:
 					res = res.group(1)
 					d[field] = markdown2.markdown(res, extras=["cuddled-lists"])
@@ -173,18 +193,18 @@ class Note:
 					d[field] = ''
 		return d
 	# return model name from sublime text
-	def parseModelName(self, body):
+	def parseModelName(self, noteBody):
 		pat = re.compile(r'{0}'.format('Model:([\s\S]+?)\n'))
-		res_model = pat.search(body)
+		res_model = pat.search(noteBody)
 		if res_model != None:
 			res_model = res_model.group(1)
 		else:
 			return ''
 		return res_model
 
-	def parseDeckName(self, body):
+	def parseDeckName(self, noteBody):
 		pat = re.compile(r'{0}'.format('Deck:([\s\S]+?)\n'))
-		res_deck = pat.search(body)
+		res_deck = pat.search(noteBody)
 		if res_deck != None:
 			res_deck = res_deck.group(1)
 		else:
@@ -192,10 +212,10 @@ class Note:
 		return res_deck
 
 	#TODO： return list of tags
-	def parseTags(self, body):
+	def parseTags(self, noteBody):
 		res_tag = []
 		pat = re.compile(r'{0}'.format('##Tags([\s\S]+?)##'))
-		res = pat.search(body)
+		res = pat.search(noteBody)
 		if res != None:
 			pat = re.compile(r',')
 			res_spli = pat.split(res.group(1))
@@ -206,19 +226,26 @@ class Note:
 	def sendNote(self):
 		# print('sendNote:'+self.deck)
 		note = {
-					'deckName' :self.deck,
-					'modelName':self.model.name,
-					'fields'   :self.fields_dict,
-					'tags'     :self.tags_list
+				'deckName' :self.deck,
+				'modelName':self.model.name,
+				'fields'   :self.fields_dict,
+				'tags'     :self.tags_list
 				}
 
 		dic = Resource(6, note).res
-		if 'result' in dic:
+		if 'result' in dic and dic.get('result') != None:
 			id =  dic.get('result')
+
 			self.is_sent = True
 			self.id = id
-			print(self.id)
-			print(self.is_sent)
+			# print(self.id)
+			# print(self.is_sent)
+		elif dic.get('error'):
+				print(dic.get('error'))
+				# print('duplicated notes number:{0}'.format())
+		# Sync
+		# time.sleep(1)
+		# Resource(2)
 
 
 #creat new Template by the givin model and deck.
@@ -240,16 +267,16 @@ class Template:
 			str  = '\n'
 			info_string = str.join(info_list)
 
-			body_list = []
+			noteBody_list = []
 			# add Tag
-			body_list.append('##Tags')
+			noteBody_list.append('##Tags')
 
 			for field in self.fields_list:
-				body_list.append('##' + field)
-			body_list.append('============================\n')
+				noteBody_list.append('##' + field)
+			noteBody_list.append('============================\n')
 			# seperate by two line, easy to read in MarkDown
 			str  = '\n\n'
-			note_string = str.join(body_list)
+			note_string = str.join(noteBody_list)
 
 			note_string = info_string + note_string
 			print(note_string)
@@ -258,19 +285,24 @@ class Template:
 			return ''
 
 class NoteBook:
-	def __init__(self, body):
-		self.body = body
-
+	def __init__(self, bookBody):
+		self.bookBody = bookBody
+		self.num_note_sent = 0
 	def send(self):
 		pat = re.compile(r'\n===========')
-		res_spli = pat.split(self.body)
+		res_spli = pat.split(self.bookBody)
 		leng = len(res_spli )
-		print(leng)
+		# print(leng)
 		i = 0
 		for a_note_str in res_spli:
 			i += 1
 			#discard the last item in res_spli
 			if i == leng :
 				break
-			Note(a_note_str).sendNote()
-
+			n = Note(a_note_str)
+			n.sendNote()
+			if n.is_sent:
+				self.num_note_sent += 1
+				#TODO:
+				#add sent syntax to this note in sublime
+				#find(pattern, start_point, <flags>)
