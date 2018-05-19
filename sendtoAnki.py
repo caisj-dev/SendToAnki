@@ -85,7 +85,8 @@ class SendToAnkiCommand(sublime_plugin.TextCommand): #create Webify Text Command
                 print('note sent successful:{0}'.format(notes.num_note_sent))
                 sublime.status_message('ok')
 
-
+        # st = '##Question\n([\s\S]+?)##'
+        self.find_one_note(edit)
         # # match = self.view.find_all(r'#', 0)
         # match = self.view.find(r'#', 0)
         # find_no_note = self.is_empty_match(match)
@@ -104,3 +105,42 @@ class SendToAnkiCommand(sublime_plugin.TextCommand): #create Webify Text Command
     def is_empty_match(self, match):
         return match is None
 
+    def find_all_notes(self):
+        ''' this method return all the notes' region in a list
+
+        '''
+        s = 'Deck:([\s\S]+?)\n===='
+        match_region = self.view.find_all(r'{0}'.format(s),0)
+
+    def find_one_note(self,edit):
+        ''' this method return one note's region
+
+        '''
+        s = 'Deck:([\s\S]+?)\n===='
+        match_region = self.view.find(r'{0}'.format(s),0)
+
+        find_no_note = self.is_empty_match(match_region)
+        if find_no_note:
+
+            print('no notes!')
+        else:
+            # test
+            # self.view.sel().add(match_region)
+
+            # Returns the line that contains the point.
+            # the return type is Region
+            # print('region\'s start with:{0}'.format(match_region.begin()))
+            # print('region\'s end with:{0}'.format(match_region.end()))
+            rg_start_line = self.view.line(match_region.a)
+
+            self.view.insert(edit, rg_start_line.b, 'OK')
+            print(self.view.substr(match_region))
+
+            # rg_end_line = self.view.line(match_region.b)
+            # print('region\'s first line start with:{0}'.format(rg_start_line.a))
+            # print('region\'s first line end with  :{0}'.format(rg_start_line.b))
+
+            # print('region\'s last line start with:{0}'.format(rg_end_line.a))
+            # print('region\'s last line end with  :{0}'.format(rg_end_line.b))
+
+            # print(match_region.size())
