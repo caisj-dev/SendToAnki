@@ -7,69 +7,6 @@ import  markdown2
 import time
 
 import sublime, sublime_plugin
-# class Command:
-#   VERSION           = ['version',         {}]
-#   # MODEL_FIELD_NAMES = ['modelFieldNames', { "modelName": something}]
-
-    # CMDs ={
-    #           1 : ['version',         {}],
-    #           2 : ['sync',            {}],
-    #           3 : ['modelNames',      {}],
-    #           4 : ['deckNames',       {}],
-    #           # 'something' should be str type
-    #           5 : ['modelFieldNames', { "modelName": something}],
-    #           ##'something' should be dict type
-    #           6 : ['addNote',         { "note": something}],
-    #           ##'something' should be list type
-    #           7 : ['canAddNotes',     { "notes": something}],
-    #           8 : ['updateNoteFields',{ "notes": something}],
-    #   }
-# class Resource(Command):
-#   _local_port = 'http://127.0.0.1:8765'
-#   _version = 5
-#   def __init__(self, cmd, something=[]):
-#       # These CMDs are based on the API of AnkiConnect
-#       # For more detail, see https://foosoft.net/projects/anki-connect/
-#       self.res = {}
-
-#       if cmd in self.VERSION:
-#           action = CMDs[cmd][0]
-#           params = CMDs[cmd][1]
-#           self.res = self.make_a_request(action, params)
-#       else:
-#           self.res = {}
-
-#   def make_a_request(self, action, params):
-#       res = {}
-#       try:
-#           res = requests.post(Resource._local_port,
-#                                           json = {
-#                                                   'action': action,
-#                                                   'params': params,
-#                                                   'version': Resource._version
-#                                                   })
-#           res = res.json()
-#       except requests.exceptions.ConnectionError:
-#           print('无法连接AnkiConnect端口')
-#           return res
-#       else:
-#           if len(res) == 2:
-#               print('已连接Anki，正在处理结果...')
-#               return res
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 class Resource:
     _local_port = 'http://127.0.0.1:8765'
@@ -91,7 +28,6 @@ class Resource:
                 7 : ['canAddNotes',     { "notes": something}],
                 8 : ['updateNoteFields',{ "notes": something}],
         }
-
 
         if cmd in CMDs:
             action = CMDs[cmd][0]
@@ -119,31 +55,45 @@ class Resource:
                 return res
 
 class Model:
-    def __init__(self, name):
+    def __init__(self, name=None):
         #model name
-        self.name   = name
+        self.name = name
         #model fields in a list
-        self.fields = self.getFields(name)
+        # self.get_fields_list()
 
     #return fields of a model
-    def getFields(self, name):
-        dic = Resource(5, name).res
+    def get_fields_list(self):
+
+        li = []
+
+        dic = Resource(5, self.name).res
         # print(modelFieldNameDict)
         if 'result' in dic:
             # print(modelNameDict.get('result'))
             li =  dic.get('result')
         return li
 
-class Models:
-    def __init__(self):
-        self.name_list = self.getModels()
-    def getModels(self):
+    def all_models_list(self):
+        li = []
         dic = Resource(3).res
         # print(modelFieldNameDict)
         if 'result' in dic:
             # print(modelNameDict.get('result'))
             li =  dic.get('result')
         return li
+
+
+# class Models:
+#     def __init__(self):
+#         self.name_list = self.getModels()
+#     def getModels(self):
+#         li = []
+#         dic = Resource(3).res
+#         # print(modelFieldNameDict)
+#         if 'result' in dic:
+#             # print(modelNameDict.get('result'))
+#             li =  dic.get('result')
+#         return li
 class Decks:
     def __init__(self):
         self.name_list = self.getDecks()
@@ -161,13 +111,9 @@ class Note:
 
         self.region = region
         self.rg_size = region.size()
-        self.view =view
+        self.view =  view
         self.edit = edit
-        # self.rg_start_line, self.rg_end_line = self.rg_start_end_line()
-
-
         self.note_body   = self.get_note_body(view, region)
-
         self.deck        = self.parse_deck_name(self.note_body)
         self.model       = Model(self.parse_model_name(self.note_body))
         self.fields_dict = self.parse_note_fields(self.note_body)
@@ -181,7 +127,6 @@ class Note:
         #input: noteBody
         #output: point or region
 
-
     def is_empty_match(self, match):
         return match is None
 
@@ -189,20 +134,6 @@ class Note:
         ''' return note string
         '''
         return view.substr(region)
-
-    # def rg_start_end_line(self):
-    #     empty_note = self.is_empty_match(self.region)
-    #     if empty_note:
-    #         print('this note region is empty!')
-    #     else:
-    #         # print('region\'s start with:{0}'.format(match_region.begin()))
-    #         # print('region\'s end with:{0}'.format(match_region.end()))
-
-    #         rg_start_line = self.view.line(self.region.begin())
-    #         rg_end_line = self.view.line(self.region.end())
-    #         # self.view.insert(edit, rg_start_line.b, 'OK')
-    #         return rg_start_line, rg_end_line
-
 
     def rg_state_line(self):
         '''return a the state region in the view
@@ -223,7 +154,7 @@ class Note:
     def parse_note_fields(self, note_body):
         d = {}
         #pat =  '##{0}([.\n]+)##{0}|##([.\n]+)---'.format(field,field)
-        for field in self.model.fields:
+        for field in self.model.get_fields_list():
             # st = '##{0}\n([\s\S]+)##'.format(field)
             pat = re.compile(r'{0}'.format('##{0}\n([\s\S]+?)##'.format(field)))
 
@@ -286,7 +217,6 @@ class Note:
 
         state_region = self.rg_state_line()
         # print('important:')
-        # print('important:')
         # print(self.view.substr(state_region))
         self.view.replace(self.edit, state_region, 'State:'+u'✔'+ '\n')
         self.state = u'✔'
@@ -344,7 +274,7 @@ class Template:
     def __init__(self, deck, model):
         self.deck        = deck
         self.model       = model
-        self.fields_list = Model(model).fields
+        self.fields_list = Model(model).get_fields_list()
 
 
     #return a template string.
