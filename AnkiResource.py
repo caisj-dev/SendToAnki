@@ -48,6 +48,7 @@ class Resource:
             res = res.json()
         except requests.exceptions.ConnectionError:
             print('无法连接AnkiConnect端口')
+            sublime.error_message('无法连接AnkiConnect端口')
             return res
         else:
             if len(res) == 2:
@@ -56,48 +57,28 @@ class Resource:
 
 class Model:
     def __init__(self, name=None):
-        #model name
         self.name = name
-        #model fields in a list
-        # self.get_fields_list()
-
-    #return fields of a model
     def get_fields_list(self):
-
         li = []
-
         dic = Resource(5, self.name).res
-        # print(modelFieldNameDict)
         if 'result' in dic:
-            # print(modelNameDict.get('result'))
             li =  dic.get('result')
         return li
 
     def all_models_list(self):
         li = []
         dic = Resource(3).res
-        # print(modelFieldNameDict)
         if 'result' in dic:
-            # print(modelNameDict.get('result'))
             li =  dic.get('result')
         return li
 
 
-# class Models:
-#     def __init__(self):
-#         self.name_list = self.getModels()
-#     def getModels(self):
-#         li = []
-#         dic = Resource(3).res
-#         # print(modelFieldNameDict)
-#         if 'result' in dic:
-#             # print(modelNameDict.get('result'))
-#             li =  dic.get('result')
-#         return li
+
 class Decks:
     def __init__(self):
         self.name_list = self.getDecks()
     def getDecks(self):
+        li = []
         dic = Resource(4).res
         # print(modelFieldNameDict)
         if 'result' in dic:
@@ -138,17 +119,10 @@ class Note:
     def rg_state_line(self):
         '''return a the state region in the view
         '''
-            # empty_note = self.is_empty_match(self.region)
-            # if empty_note:
-            #     print('this note region is empty!')
-            # else:
-        s = 'State:([\s\S]+?)\n'
+        s = 'State([\s\S]+?)\n'
         state_rg = self.view.find(r'{0}'.format(s), self.region.begin())
-        # print('state line string：')
-
-        # print(self.view.substr(state_rg))
+        # state_rg = self.view.line(state_rg)
         return state_rg
-            # print(self.view.substr(state_region))
 
     # return body of note in a dict
     def parse_note_fields(self, note_body):
@@ -218,7 +192,7 @@ class Note:
         state_region = self.rg_state_line()
         # print('important:')
         # print(self.view.substr(state_region))
-        self.view.replace(self.edit, state_region, 'State:'+u'✔'+ '\n')
+        self.view.replace(self.edit, state_region, 'State:' + u'✔' + '\n')
         self.state = u'✔'
         # self.view.insert(self.edit, self.rg_start_line.b, u'✔')
 
@@ -243,27 +217,18 @@ class Note:
                 }
 
         dic = Resource(6, note).res
-
         if (dic.get('result') is None) and ('existing' in dic.get('error')):
             self.is_sent = True
             print('Found one Duplicated note.')
             self.change_state_ok()
             print('Changed state into ok')
-            # print(dic.get('error'))
-
         if (dic.get('error') is None ) and (dic.get('result') != None):
             self.id = dic.get('result')
             print(self.id)
             self.change_state_ok()
             # print(dic.get('result'))
             print('Changed state into ok')
-        # if dic.get('error') != None:
-        #     self.is_sent = False
-        #     self.id = None
-        #     print('Changed state into fail')
-        #     self.change_state_fail()
-        #     print(dic.get('error'))
-                # print('duplicated notes number:{0}'.format())
+
         # Sync
         # time.sleep(1)
         # Resource(2)
@@ -275,16 +240,14 @@ class Template:
         self.deck        = deck
         self.model       = model
         self.fields_list = Model(model).get_fields_list()
-
-
     #return a template string.
     def new(self):
         # fields_list = self.model.fields
         print(len(self.fields_list))
         if len(self.fields_list) != 0:
             info_list = []
-            info_list.append('Deck :'+ self.deck  )
-            info_list.append('Model:'+ self.model )
+            info_list.append('Deck :'+ self.deck)
+            info_list.append('Model:'+ self.model)
             info_list.append('State:'+ u'☐')
             info_list.append('----------------------------\n')
             str  = '\n'
@@ -307,28 +270,27 @@ class Template:
         else:
             return ''
 
-class NoteBook:
-    def __init__(self, view, regions_list):
-        # self.bookBody = self.get_notebook_body()
-        self.note_regions_list = regions_list
-        self.num_notes_sent = 0
+# class NoteBook:
+#     def __init__(self, view, regions_list):
+#         # self.bookBody = self.get_notebook_body()
+#         self.note_regions_list = regions_list
+#         self.num_notes_sent = 0
 
-
-    def send(self):
-        # pat = re.compile(r'\n===========')
-        # res_spli = pat.split(self.bookBody)
-        note_num = len(self.note_regions_list )
-        # print(leng)
-        i = 0
-        for each_note_rg in self.note_regions_list:
-            i += 1
-            #discard the last item in res_spli
-            if i == note_num :
-                break
-            n = Note(each_note_rg)
-            n.send_it()
-            if n.is_sent:
-                self.num_notes_sent += 1
-                #TODO:
-                #add sent syntax to this note in sublime
-                #find(pattern, start_point, <flags>)
+#     def send(self):
+#         # pat = re.compile(r'\n===========')
+#         # res_spli = pat.split(self.bookBody)
+#         note_num = len(self.note_regions_list )
+#         # print(leng)
+#         i = 0
+#         for each_note_rg in self.note_regions_list:
+#             i += 1
+#             #discard the last item in res_spli
+#             if i == note_num :
+#                 break
+#             n = Note(each_note_rg)
+#             n.send_it()
+#             if n.is_sent:
+#                 self.num_notes_sent += 1
+#                 #TODO:
+#                 #add sent syntax to this note in sublime
+#                 #find(pattern, start_point, <flags>)

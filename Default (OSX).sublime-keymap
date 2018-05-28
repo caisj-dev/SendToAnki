@@ -1,4 +1,4 @@
 [
-  { "keys": ["super+enter"], "command": "insert_note_field_by_syntax" },
+  { "keys": ["super+enter"], "command": "new_note" },
   { "keys": ["ctrl+shift+a"], "command": "send_to_anki" }
 ]
