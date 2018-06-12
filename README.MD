@@ -1,8 +1,8 @@
 # sublime-sendtoAnki
 
-> Sublime plugin to send note to Anki
+> Sublime Text 3 plugin to send notes to Anki
 
-Do you use Anki? Do you hava the habit of taking note while learning materials intensively before computer screen? If your answer is YES, then this Sumblime plugin offers you an efficient workflow.
+This tool provide you with a convenient way to take notes and make Anki Cards. One of the biggest reasons many students love Anki is because of the powerful spaced repetition system.
 
 <!-- 以下是动图链接 -->
 <!-- <a href="https://www.patreon.com/sindresorhus">
@@ -40,7 +40,7 @@ Your notes are recommended to be taken in Markdown file, for the anki models are
 In a Markdown file, open the Command Palette *(<kbd>ctrl</kbd> <kbd>;</kbd> )* and choose one of the Anki`deck` that you are going to place the note in. Then chose one of the model.
 
 ### Send to Anki
-In a Markdown file, simply select all the notes that you would like to memorize. Right click at the select area and chose 'SendtoAnki' in the menu. Then each of the notes will be sent to specific deck in Anki, separately
+In a Markdown file, simply select all the notes that you would like to memorize. Right click at the select area and chose 'SendtoAnki' in the menu. Then each of the notes will be sent to specific deck in Anki, separately.
 
 
 ### Keyboard shortcut
@@ -52,7 +52,7 @@ Example:
 ```json
 [
     {
-        "keys": ["ctrl+;"],
+        "keys": ["ctrl+\"],
         "command": "insert_note_field_by_syntax"
     }
 ]

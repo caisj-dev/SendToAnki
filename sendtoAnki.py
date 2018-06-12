@@ -1,5 +1,5 @@
 #TechSideOnline.com Webify Sublime Text 3 plugin example
-from .AnkiResource import AnkiResource,Note,MyHelper,ForTest
+from .AnkiResource import Note,Model,Decks,Template,NoteBook,Resource
 # from .Markdown2 import Markdown
 # import urllib
 import requests
@@ -12,160 +12,124 @@ import json
 import jinja2
 import markdown2
 
-class InsertNoteFieldBySyntaxCommand(sublime_plugin.TextCommand):
-	deckList = []
-	deck = ''
-	model = ''
-	def run(self, edit):
-		# this will populate the quick_panel with models of markdown formats
-		# self.list = self.getParsedModel()
+import time
 
-		self.deckList = MyHelper.parseDeckName2List()
+class NewNoteCommand(sublime_plugin.TextCommand):
 
+    def run(self, edit):
+        # this will populate the quick_panel with models of markdown formats
+        # self.list = self.model_name()
+        self.deck_list = Decks().name_list
 
-		#show  the above list in the panel,
-		#self.on_done is called when one  of the item was chosen by user
-		self.view.window().show_quick_panel(self.deckList, self.on_done,1, 0)
-		# MyHelper.parseMDCardInfo('model:dab')
-		# decksLst =
-		# for deck in decksLst:
-		# 	print(deck)
+        #show  the above list in the panel,
+        #self.on_done is called when one of the item was chosen by user
+        if self.deck_list is not None:
+            self.view.window().show_quick_panel(self.deck_list, self.on_done_chosing_deck, 1, 0)
 
-	def on_done(self, index):
-		#  if user cancels with Esc key, do nothing
-		#  if canceled, index is returned as  -1
-		if index == -1:
-			return
-		# if user picks from list, #save the deck name for now
-		self.deck = self.deckList[index]
-		#get model list from anki in MD format
-		self.modelList = self.getParsedModel()
-		# show modellist panel
-		self.view.window().show_quick_panel(self.modelList, self.on_done_chose_model,1, 0)
+    def on_done_chosing_deck(self, index):
+        #  if user cancels with Esc key, do nothing
+        #  if canceled, index is returned as  -1
+        if index == -1:
+            return
+        # if user picks from list, #save the deck name for now
+        self.deck = self.deck_list[index]
+        #get model list from anki in MD format
+        self.model_list = [ [model, Template(self.deck, model).new()] for model in Model().all_models_list()]
+        # show model_list panel
+        self.view.window().show_quick_panel(self.model_list, self.on_done_chose_model,1, 3)
 
-	def on_done_chose_model(self, index):
-		if index ==  -1:
-			return
-		# if user picks from list, return the correct entry
-		self.view.run_command(
-		"insert_my_text", {
-		"args":
-			{'text': self.modelList[index][1]}
-		})
+    def on_done_chose_model(self, index):
+        if index ==  -1:
+            return
+        # if user picks from list, return the correct entry
 
-	#get a list of model from  anki, each of them  are parsed into Markdown
-	def getParsedModel(self):
-		parsedModel =[]
-		#get all model names in list
-		modelList = MyHelper.parseModelName2List()
-		deck = self.deck
-		#parse each of the model in the list
-		for model in modelList:
-			parsedModel.append([model,Note.cardModel2MarkdowndSyntax(model, deck)])
-		return parsedModel
+        line = 1
+        #move the cursor to the begin of document, personal preference
+        self.view.run_command(
+        "insert_my_text", {
+        "args":
+            {'text': self.model_list[index][1]}
+        })
+
 
 class InsertMyText(sublime_plugin.TextCommand):
-	 def run(self, edit, args):
-	 	self.view.insert(edit, self.view.sel()[0].begin(), args['text'])
+     def run(self, edit, args):
+        line = 1
+        #move the cursor to the begin of document, personal preference
+        point = self.view.text_point(line - 1, 0)
+        self.view.insert(edit, point, args['text'])
+        self.view.show(point)
 
+class MoveCursorCommand(sublime_plugin.TextCommand):
+     def run(self, edit, args):
+        line = 5
+        #move the cursor to the begin of document, personal preference
+        point = self.view.text_point(line - 1, 0)
+        # self.view.insert(edit, point,'')
 
 class SendToAnkiCommand(sublime_plugin.TextCommand): #create Webify Text Command
-	def run(self, edit):   #implement run method
-		x = AnkiResource()
-		# print (ForTest.ModelNameList ())
-		ForTest.ModelNameList ()
+    def run(self, edit):   #implement run method
+        # for region in self.view.sel():  #get user selection
+        #     if not region.empty():  #if selection not empty then
+        #         sel_str = self.view.substr(region)  #assign s variable the selected region
+        #         notes = NoteBook(sel_str)
+        #         notes.send()
+        #         print('note sent successful:{0}'.format(notes.num_notes_sent))
+        #         sublime.status_message('ok')
+        # s = 'Deck:([\s\S]+?)\n===='
+        # note_regions = self.view.find_all(r'{0}'.format(s),0)
+        # NoteBook(note_regions)
 
-		print(x.getDeckNames())
-		deckName = 'Programing&Algorithm'
-		ModelName = '知识点-Basic (Leaflyer)'
-		tags = ['InnerClass']
-		for region in self.view.sel():  #get user selection
-			if not region.empty():  #if selection not empty then
-				s = self.view.substr(region)  #assign s variable the selected region
-				# print(s)
-				linesList = s.splitlines()
-				notes = self.getNotes(linesList)
-				for k, v in notes.items():
-					print(k, v)
-					v = markdown2.markdown(v, extras=["cuddled-lists"])  # or use `html = markdown_path(PATH)`
-					k = markdown2.markdown(k, extras=["cuddled-lists"])  # or use `html = markdown_path(PATH)`
-					# print( markdown2.markdown('Use the `printf()` function.') )
+        '''Two strategies are defined for send note:
+                1. note that are going to be sent for the first time,
+                which is denoted by it's state '☐'，will use strategy 1
+                2. note that are
+        '''
+        suc_num = 0
+        sp = 0
+        note_rg = self.find_one_note_region_from(sp)
+        while note_rg != None:
+            n = Note(self.view, edit, note_rg)
+            # those already exit in Anki will be ignored
+            if ('✔' in n.state):
+                print('ignore it')
+                sp = sp + n.rg_size
+                note_rg = self.find_one_note_region_from(sp)
+                # self.view.fold(note_rg)
+                continue
+            n.send_it()
+            suc_num += 1
+            # if self.view.fold(note_rg):
+            #     print('fold note!')
+            sp = sp + n.rg_size
+            # print(sp)
+            note_rg = self.find_one_note_region_from(sp)
+            time.sleep(0.01)
 
-					Note.add(deckName, ModelName, k, v,tags )
-				# self.view.replace(edit, region, news) #replace content in view
-				a = 'I did these things:\n* bullet1\n* bullet2\n* bullet3\n'
-				print(markdown2.markdown(a, extras=["cuddled-lists"]))
-			else:
-				print('空的region')
+        sublime.ok_cancel_dialog('已添加{0}条笔记，马上同步至AnkiWeb吗?'.format(suc_num), '同步')
 
+    def is_empty_match(self, match):
+        return match.size() == 0
 
-	def getNotes(self, listOfLines):
-		"""
-		A note includes Question field and Answer field.
-		For list of lines, which includes many notes.
-		each note may has multiple Question lines,
-		and the vary first one starts with Syntax '#',
-		followed by Answer lines, whose vary first line
-		starts with'##'
+    def find_all_notes(self):
+        ''' this method return all the notes' region in a list
 
-		retun a dictionry:
-			Key:Question
-			Value: Answer
+        '''
+        s = 'Deck:([\s\S]+?)\n===='
+        match_region = self.view.find_all(r'{0}'.format(s),0)
 
-		"""
-		p = 0
-		i = 0
-		notesDict = dict()
-		while p < len(listOfLines):
-			s = ''
-			questionList = []
-			answerList = []
-			# if not MyHelper.isQusetionSyntax(listOfLines[p]):
-			# 	p += 1
-			# 	continue
+    def find_one_note_region_from(self, start_point):
+        ''' this method return one note's region
 
-			print(i)
-			if MyHelper.isQusetionSyntax(listOfLines[i]):
-				i = p
-				while not MyHelper.isAnswerSyntax(listOfLines[i]):
-					#ignore the Syntax line
-					if MyHelper.isQusetionSyntax(listOfLines[i]):
-						i += 1
-						continue
-					print('Entering Question text')
-					questionList.append( listOfLines[i] )
-					questionList.append( '\n')
-					i += 1
-				# get one note's Question
-				questionString = s.join(questionList)
-				print(questionString)
-			while not MyHelper.isQusetionSyntax(listOfLines[i]):
-				#ignore the Syntax line
-				if MyHelper.isAnswerSyntax(listOfLines[i]):
-					i += 1
-					continue
-				print('Entering answer text')
-				answerList.append( listOfLines[i] )
-				answerList.append( '\n')
-				i += 1
-				if (i >= len(listOfLines)):
-					break
-			answerString = s.join(answerList)
-			print(answerString)
-			notesDict[questionString] = answerString
-			p = i
-			# p = p + 1
-		print('EddND')
-		return notesDict
+        '''
+        s = 'Deck :([\s\S]+?)\n===='
+        one_note_region = self.view.find(r'{0}'.format(s), start_point)
+
+        find_no_note = self.is_empty_match(one_note_region)
+        if find_no_note :
+            print('no note left!')
+            return None
+        else:
+            return one_note_region
 
 
-
-
-class TestCommand(sublime_plugin.TextCommand):  #Test command
-	def run(self, edit):
-		for region in self.view.sel():
-			if not region.empty():
-				s = self.view.substr(region)
-				news = s.replace('&lt;', '<')  #reversed from Webify
-				news = news.replace('&gt;', '>')  #reversed from Webify
-				self.view.replace(edit, region, news)

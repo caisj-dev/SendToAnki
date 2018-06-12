@@ -1,4 +1,4 @@
 [
-  { "keys": ["ctrl+;"], "command": "insert_note_field_by_syntax" },
+  { "keys": ["ctrl+\\"], "command": "new_note" },
   { "keys": ["ctrl+shift+right"], "command": "send_to_anki" }
 ]
