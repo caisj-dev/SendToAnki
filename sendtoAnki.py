@@ -52,6 +52,7 @@ class NewNoteCommand(sublime_plugin.TextCommand):
         })
 
 
+
 class InsertMyText(sublime_plugin.TextCommand):
      def run(self, edit, args):
         line = 1
