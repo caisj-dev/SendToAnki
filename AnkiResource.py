@@ -295,4 +295,4 @@ class Template:
 #                 #TODO:
 #                 #add sent syntax to this note in sublime
 #                 #find(pattern, start_point, <flags>)
->>>>>>> dev2
+

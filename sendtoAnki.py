@@ -1,5 +1,5 @@
 #TechSideOnline.com Webify Sublime Text 3 plugin example
-from .AnkiResource import Note,Model,Decks,Template,NoteBook,Resource
+from .AnkiResource import Note,Model,Decks,Template,Resource
 # from .Markdown2 import Markdown
 # import urllib
 import requests

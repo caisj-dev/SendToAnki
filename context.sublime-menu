@@ -1,7 +1,7 @@
 [
-{ 
-    "caption": "SendToAnki", 
-	"id": "Send_to_Anki", 
+{
+    "caption": "SendToAnki",
+	"id": "Send_to_Anki",
 	"children":
 	[
 	{
