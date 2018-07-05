@@ -1,16 +1,13 @@
-#TechSideOnline.com Webify Sublime Text 3 plugin example
+
 from .AnkiResource import Note,Model,Decks,Template,Resource
-# from .Markdown2 import Markdown
-# import urllib
+
 import requests
 import datetime
-# from requests import Request
+
 import sublime
 import sublime_plugin
 import re, string  #import the required modules
 import json
-import jinja2
-import markdown2
 
 import time
 
@@ -36,7 +33,7 @@ class NewNoteCommand(sublime_plugin.TextCommand):
         #get model list from anki in MD format
         self.model_list = [ [model, Template(self.deck, model).new()] for model in Model().all_models_list()]
         # show model_list panel
-        self.view.window().show_quick_panel(self.model_list, self.on_done_chose_model,1, 3)
+        self.view.window().show_quick_panel(self.model_list, self.on_done_chose_model,1, 0)
 
     def on_done_chose_model(self, index):
         if index ==  -1:
@@ -70,21 +67,10 @@ class MoveCursorCommand(sublime_plugin.TextCommand):
 
 class SendToAnkiCommand(sublime_plugin.TextCommand): #create Webify Text Command
     def run(self, edit):   #implement run method
-        # for region in self.view.sel():  #get user selection
-        #     if not region.empty():  #if selection not empty then
-        #         sel_str = self.view.substr(region)  #assign s variable the selected region
-        #         notes = NoteBook(sel_str)
-        #         notes.send()
-        #         print('note sent successful:{0}'.format(notes.num_notes_sent))
-        #         sublime.status_message('ok')
-        # s = 'Deck:([\s\S]+?)\n===='
-        # note_regions = self.view.find_all(r'{0}'.format(s),0)
-        # NoteBook(note_regions)
-
-        '''Two strategies are defined for send note:
-                1. note that are going to be sent for the first time,
-                which is denoted by it's state '☐'，will use strategy 1
-                2. note that are
+        '''Two strategies are defined to send notes:
+                1. notes that are going to be sent for the first time,
+                whose state is '☐', would be sent for sure.
+                2. notes that are sent, whose state is '✔', would be ignore.
         '''
         suc_num = 0
         sp = 0

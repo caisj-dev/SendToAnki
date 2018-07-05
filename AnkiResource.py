@@ -1,9 +1,15 @@
+import os
+import sys
 import json
 import string
 import re
-# import asyncio
+
 import requests
-import  markdown2
+
+abspath = os.path.abspath(os.path.dirname(__file__))
+sys.path.append(abspath)
+import markdown2
+
 
 import time
 
@@ -48,12 +54,12 @@ class Resource:
                                                     })
             res = res.json()
         except requests.exceptions.ConnectionError:
-            print('无法连接AnkiConnect端口')
-            sublime.error_message('无法连接AnkiConnect端口')
+            print('Unable to connect to AnkiConnect port, please check that Anki plugin')
+            sublime.error_message('Unable to connect to AnkiConnect port, please check that Anki plugin')
             return res
         else:
             if len(res) == 2:
-                print('已连接Anki，正在处理结果...')
+                print('Successful connection to Anki，processing ...')
                 return res
 
 class Model:
