@@ -20,6 +20,9 @@ This tool provide you with a convenient way to take notes and make Anki Cards. O
 ## Install
 Note: this plugin hasn't been submitted to the [Package Control](https://packagecontrol.io) .
 <!-- Install `Autoprefixer` with [Package Control](https://packagecontrol.io) and restart Sublime. -->
+you should use sublime package manager
+use cmd+shift+p then Package Control: Install Package
+look for Confluence and install it.
 
 ### Dependency
 #### Package Control Dependency

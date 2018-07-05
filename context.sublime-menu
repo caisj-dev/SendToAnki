@@ -1,11 +1,11 @@
 [
 {
-    "caption": "SendToAnki",
+    "caption": "Send to Anki",
 	"id": "Send_to_Anki",
 	"children":
 	[
 	{
-	"caption": "SendToAnki Selection",
+	"caption": "Send to Anki",
 	"command": "send_to_anki"
 	}
 	// {
